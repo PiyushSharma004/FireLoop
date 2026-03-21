@@ -1,7 +1,12 @@
 self.__BUILD_MANIFEST = {
   "__rewrites": {
     "afterFiles": [],
-    "beforeFiles": [],
+    "beforeFiles": [
+      {
+        "source": "/FireLoop//_next/:path+",
+        "destination": "/FireLoop/_next/:path+"
+      }
+    ],
     "fallback": []
   },
   "sortedPages": [
