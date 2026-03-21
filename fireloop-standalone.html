@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔥 FireLoop - Emotion-Aware Streaming</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { 
+            background: #0f172a; 
+            color: white; 
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        .hero-slide {
+            transition: all 1s ease-in-out;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .pulse-orange {
+            animation: pulse-orange 2s infinite;
+        }
+        @keyframes pulse-orange {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(249, 115, 22, 0); }
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-white">
+    <!-- Loading Screen -->
+    <div id="loading" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-50">
+        <div class="text-center">
+            <div class="text-6xl mb-4 animate-bounce">🔥</div>
+            <h1 class="text-3xl font-bold text-orange-400 mb-2">FireLoop</h1>
+            <p class="text-slate-400">Loading your emotion-aware experience...</p>
+            <div class="mt-4">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-400 mx-auto"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app" class="hidden min-h-screen">
+        <!-- Header -->
+        <header class="bg-slate-800 border-b border-slate-700 p-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="text-2xl animate-pulse">🔥</div>
+                    <div>
+                        <h1 class="text-xl font-bold text-orange-400">FireLoop</h1>
+                        <p class="text-xs text-slate-500">Emotion-Aware Streaming</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 text-sm text-slate-400">
+                    <div class="flex items-center gap-2 px-3 py-1 bg-slate-700 rounded-full">
+                        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                        <span class="text-green-400">Live Demo</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Hero Carousel -->
+        <div class="relative h-96 overflow-hidden">
+            <div id="hero-container" class="relative h-full">
+                <!-- Slide 1 -->
+                <div class="hero-slide absolute inset-0 bg-gradient-to-r from-red-900/80 to-purple-900/80">
+                    <img src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=1200&h=400&fit=crop" 
+                         alt="Stranger Things" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent"></div>
+                    <div class="absolute inset-0 flex items-center p-8">
+                        <div class="max-w-2xl">
+                            <div class="bg-orange-500 text-white text-sm font-medium px-3 py-1 rounded-full inline-block mb-4">
+                                Season 4 Now Available
+                            </div>
+                            <h2 class="text-5xl font-bold mb-4">Stranger Things</h2>
+                            <p class="text-lg text-slate-200 mb-6">When a young boy vanishes, a small town uncovers a mystery involving secret experiments and supernatural forces.</p>
+                            <div class="flex gap-4">
+                                <button class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 pulse-orange">
+                                    ▶️ Play Now
+                                </button>
+                                <button class="border border-white/30 text-white px-6 py-3 rounded-lg hover:bg-white/10">
+                                    ℹ️ More Info
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div class="bg-slate-800 border border-slate-700 rounded-lg p-6 hover:scale-105 transition-transform cursor-pointer">
+                    <div class="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center mb-4">
+                        <span class="text-2xl">🧠</span>
+                    </div>
+                    <h3 class="font-semibold text-white mb-2">Analyze My Mood</h3>
+                    <p class="text-slate-400 text-sm">Get personalized recommendations</p>
+                </div>
+                
+                <div class="bg-slate-800 border border-slate-700 rounded-lg p-6 hover:scale-105 transition-transform cursor-pointer">
+                    <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mb-4">
+                        <span class="text-2xl">⏰</span>
+                    </div>
+                    <h3 class="font-semibold text-white mb-2">Continue Watching</h3>
+                    <p class="text-slate-400 text-sm">Pick up where you left off</p>
+                </div>
+                
+                <div class="bg-slate-800 border border-slate-700 rounded-lg p-6 hover:scale-105 transition-transform cursor-pointer">
+                    <div class="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mb-4">
+                        <span class="text-2xl">👥</span>
+                    </div>
+                    <h3 class="font-semibold text-white mb-2">Watch with Friends</h3>
+                    <p class="text-slate-400 text-sm">Start a FireCall session</p>
+                </div>
+            </div>
+
+            <!-- Featured Content -->
+            <h2 class="text-2xl font-bold mb-6">Trending Now</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                <div class="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden hover:scale-105 transition-transform cursor-pointer">
+                    <div class="aspect-[3/4] relative">
+                        <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=200&h=300&fit=crop" 
+                             alt="The Bear" class="w-full h-full object-cover">
+                        <div class="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                            ⭐ 8.7
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <h3 class="font-semibold text-white text-sm">The Bear</h3>
+                        <p class="text-xs text-slate-400">Comedy Drama • 2022</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden hover:scale-105 transition-transform cursor-pointer">
+                    <div class="aspect-[3/4] relative">
+                        <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=200&h=300&fit=crop" 
+                             alt="Ted Lasso" class="w-full h-full object-cover">
+                        <div class="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                            ⭐ 8.9
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <h3 class="font-semibold text-white text-sm">Ted Lasso</h3>
+                        <p class="text-xs text-slate-400">Comedy • 2020</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden hover:scale-105 transition-transform cursor-pointer">
+                    <div class="aspect-[3/4] relative">
+                        <img src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=200&h=300&fit=crop" 
+                             alt="The Crown" class="w-full h-full object-cover">
+                        <div class="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                            ⭐ 8.6
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <h3 class="font-semibold text-white text-sm">The Crown</h3>
+                        <p class="text-xs text-slate-400">Drama • 2016</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden hover:scale-105 transition-transform cursor-pointer">
+                    <div class="aspect-[3/4] relative">
+                        <img src="https://images.unsplash.com/photo-1509248961158-e54f6934749c?w=200&h=300&fit=crop" 
+                             alt="Wednesday" class="w-full h-full object-cover">
+                        <div class="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                            ⭐ 8.1
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <h3 class="font-semibold text-white text-sm">Wednesday</h3>
+                        <p class="text-xs text-slate-400">Dark Comedy • 2022</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden hover:scale-105 transition-transform cursor-pointer">
+                    <div class="aspect-[3/4] relative">
+                        <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=200&h=300&fit=crop" 
+                             alt="House of Dragon" class="w-full h-full object-cover">
+                        <div class="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                            ⭐ 8.4
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <h3 class="font-semibold text-white text-sm">House of Dragon</h3>
+                        <p class="text-xs text-slate-400">Fantasy • 2022</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden hover:scale-105 transition-transform cursor-pointer">
+                    <div class="aspect-[3/4] relative">
+                        <img src="https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=200&h=300&fit=crop" 
+                             alt="Breaking Bad" class="w-full h-full object-cover">
+                        <div class="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                            ⭐ 9.5
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <h3 class="font-semibold text-white text-sm">Breaking Bad</h3>
+                        <p class="text-xs text-slate-400">Crime Drama • 2008</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Demo Features -->
+            <div class="mt-12 text-center">
+                <h2 class="text-2xl font-bold mb-6">🔥 FireLoop Features</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-slate-800 border border-slate-700 rounded-lg p-4">
+                        <div class="text-3xl mb-2">🧠</div>
+                        <h3 class="font-semibold mb-2">AI Mood Detection</h3>
+                        <p class="text-sm text-slate-400">Analyze facial expressions for personalized content</p>
+                    </div>
+                    <div class="bg-slate-800 border border-slate-700 rounded-lg p-4">
+                        <div class="text-3xl mb-2">📞</div>
+                        <h3 class="font-semibold mb-2">FireCall</h3>
+                        <p class="text-sm text-slate-400">Video calls with emotion-synced viewing</p>
+                    </div>
+                    <div class="bg-slate-800 border border-slate-700 rounded-lg p-4">
+                        <div class="text-3xl mb-2">🎤</div>
+                        <h3 class="font-semibold mb-2">Voice Search</h3>
+                        <p class="text-sm text-slate-400">Find movies with fuzzy voice descriptions</p>
+                    </div>
+                    <div class="bg-slate-800 border border-slate-700 rounded-lg p-4">
+                        <div class="text-3xl mb-2">♿</div>
+                        <h3 class="font-semibold mb-2">Accessibility</h3>
+                        <p class="text-sm text-slate-400">Enhanced features for deaf users</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Call to Action -->
+            <div class="mt-12 text-center bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-500/30 rounded-lg p-8">
+                <h2 class="text-2xl font-bold mb-4">Ready for the Full Experience?</h2>
+                <p class="text-slate-300 mb-6">This is a simplified demo. Get the complete FireLoop prototype with all features!</p>
+                <div class="flex gap-4 justify-center">
+                    <button class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold">
+                        🚀 Deploy to Vercel
+                    </button>
+                    <button class="border border-orange-500 text-orange-400 px-6 py-3 rounded-lg hover:bg-orange-500/10">
+                        📥 Download Code
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Show loading screen then app
+        setTimeout(() => {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('app').classList.remove('hidden');
+            document.getElementById('app').classList.add('fade-in');
+        }, 2000);
+
+        // Add click handlers for demo
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('button') || e.target.closest('.cursor-pointer')) {
+                // Create notification
+                showNotification('🔥 Demo Action', 'This is a demo version. Full features available in the complete prototype!');
+            }
+        });
+
+        function showNotification(title, message) {
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 right-4 bg-slate-800 border border-orange-500/30 text-white p-4 rounded-lg shadow-lg z-50 max-w-sm';
+            notification.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <div class="text-orange-400 text-xl">🔥</div>
+                    <div>
+                        <h4 class="font-medium">${title}</h4>
+                        <p class="text-sm text-slate-300 mt-1">${message}</p>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 4000);
+        }
+
+        // Welcome message
+        setTimeout(() => {
+            showNotification('Welcome to FireLoop! 🔥', 'This is a demo version. Click around to explore the interface!');
+        }, 3000);
+    </script>
+</body>
+</html>
