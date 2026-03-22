@@ -116,12 +116,26 @@ export function HomeView({ setActiveFeature }: HomeViewProps) {
     setCurrentSlide(index)
   }
 
-  const handlePlay = (content: TMDBMovie) => {
-    showNotification("success", "Now Playing", `Starting ${content.title}`)
-    // Simulate playing content
-    setTimeout(() => {
-      showNotification("info", "Mood Detection", "Analyzing your facial expressions for better recommendations")
-    }, 2000)
+  const handlePlay = async (content: TMDBMovie) => {
+    try {
+      showNotification("info", "Loading", Fetching trailer for ${content.title}...)
+      const response = await fetch(
+        https://api.themoviedb.org/3/movie/${content.id}/videos?api_key=1a2b3261a20c9a5650f3e890b8c8668c
+      )
+      const data = await response.json()
+      const trailer = data.results?.find(
+        (v: any) => v.type === "Trailer" && v.site === "YouTube"
+      )
+      if (trailer) {
+        window.open('https://www.youtube.com/watch?v=${trailer.key}', "_blank")
+        showNotification("success", "Playing Trailer", Opening trailer for ${content.title})
+      } else {
+        window.open('https://www.youtube.com/results?search_query=${encodeURIComponent(content.title + " trailer")}', "_blank")
+        showNotification("info", "Searching", Searching YouTube for ${content.title} trailer)
+      }
+    } catch (error) {
+      showNotification("error", "Error", "Could not load trailer")
+    }
   }
 
   const toggleWatchlist = (contentId: number) => {
