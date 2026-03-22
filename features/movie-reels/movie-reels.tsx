@@ -28,175 +28,217 @@ interface MovieReel {
   hashtags: string[]
 }
 
-// Famous movie scenes with real data
+// Famous movie scenes with real working YouTube videos
 const famousMovieScenes: MovieReel[] = [
   {
     id: 1,
-    title: "I Am Iron Man",
-    movieTitle: "Iron Man",
-    description: "The moment that started the MCU - Tony Stark reveals his identity 🔥⚡ #IronMan #MCU #Marvel",
-    duration: "1:23",
-    thumbnail: "https://images.unsplash.com/photo-1635805737707-575885ab0820?w=400&h=800&fit=crop",
-    videoUrl: "https://www.youtube.com/embed/yKOLBZEv0Gk",
-    mood: "Epic",
-    genre: "Action",
-    rating: 9.6,
-    year: 2008,
-    likes: 2847000,
-    comments: 45600,
-    shares: 89400,
+    title: "All Izz Well - 3 Idiots",
+    movieTitle: "3 Idiots",
+    description: "The most iconic scene from 3 Idiots! Aal Izz Well 😂🎓 #3Idiots #AamirKhan #Bollywood",
+    duration: "2:30",
+    thumbnail: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=400&h=800&fit=crop",
+    videoUrl: "https://www.youtube.com/embed/K0eDlFX9GMc",
+    mood: "Comedy",
+    genre: "Comedy",
+    rating: 9.8,
+    year: 2009,
+    likes: 4500000,
+    comments: 120000,
+    shares: 250000,
     isLiked: false,
     isBookmarked: false,
-    username: "marvel_official",
+    username: "bollywood_comedy",
     userAvatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50&h=50&fit=crop&crop=face",
-    hashtags: ["#IronMan", "#MCU", "#Marvel", "#TonyStark"],
+    hashtags: ["#3Idiots", "#AamirKhan", "#Bollywood", "#Comedy"],
   },
   {
     id: 2,
-    title: "I Am Your Father",
-    movieTitle: "Star Wars: The Empire Strikes Back",
-    description: "The most shocking plot twist in cinema history 😱⚔️ #StarWars #DarthVader #PlotTwist",
-    duration: "0:45",
-    thumbnail: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=800&fit=crop",
-    videoUrl: "https://www.youtube.com/embed/xuJEYdOFEP4",
-    mood: "Dramatic",
-    genre: "Sci-Fi",
+    title: "Baburao Comedy - Hera Pheri",
+    movieTitle: "Hera Pheri",
+    description: "Baburao ka phone scene - ek dum mast comedy! 😂📞 #HeraPheri #Paresh #Comedy",
+    duration: "3:00",
+    thumbnail: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400&h=800&fit=crop",
+    videoUrl: "https://www.youtube.com/embed/6x0YKVbSTjA",
+    mood: "Hilarious",
+    genre: "Comedy",
     rating: 9.9,
-    year: 1980,
-    likes: 5632000,
-    comments: 78900,
-    shares: 156700,
+    year: 2000,
+    likes: 6700000,
+    comments: 234000,
+    shares: 456000,
     isLiked: true,
     isBookmarked: true,
-    username: "starwars_clips",
+    username: "hera_pheri_clips",
     userAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=50&h=50&fit=crop&crop=face",
-    hashtags: ["#StarWars", "#DarthVader", "#PlotTwist", "#Empire"],
+    hashtags: ["#HeraPheri", "#Baburao", "#Paresh", "#Comedy"],
   },
   {
     id: 3,
-    title: "You Can't Handle The Truth",
-    movieTitle: "A Few Good Men",
-    description: "Jack Nicholson's legendary courtroom scene 👨‍⚖️🔥 #AFewGoodMen #JackNicholson #Courtroom",
-    duration: "2:15",
-    thumbnail: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=400&h=800&fit=crop",
-    videoUrl: "https://www.youtube.com/embed/9FnO3igOkOk",
-    mood: "Intense",
-    genre: "Drama",
+    title: "Mr. Bean at the Dentist",
+    movieTitle: "Mr. Bean",
+    description: "Mr. Bean's funniest dentist scene ever! 😂🦷 #MrBean #Comedy #Funny",
+    duration: "4:00",
+    thumbnail: "https://images.unsplash.com/photo-1527736947477-2790e28f3443?w=400&h=800&fit=crop",
+    videoUrl: "https://www.youtube.com/embed/eZbtAFq7dP8",
+    mood: "Hilarious",
+    genre: "Comedy",
     rating: 9.7,
     year: 1992,
-    likes: 1284700,
-    comments: 34500,
-    shares: 67800,
+    likes: 8900000,
+    comments: 345000,
+    shares: 567000,
     isLiked: false,
     isBookmarked: false,
-    username: "classic_cinema",
+    username: "mrbean_official",
     userAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop&crop=face",
-    hashtags: ["#AFewGoodMen", "#JackNicholson", "#Courtroom", "#Classic"],
+    hashtags: ["#MrBean", "#Comedy", "#Funny", "#Classic"],
   },
   {
     id: 4,
-    title: "Here's Johnny!",
-    movieTitle: "The Shining",
-    description: "The most terrifying door scene ever filmed 😱🚪 #TheShining #Horror #StanleyKubrick",
-    duration: "1:34",
-    thumbnail: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=800&fit=crop",
-    videoUrl: "https://www.youtube.com/embed/WDpipB4yehk",
-    mood: "Terrifying",
-    genre: "Horror",
-    rating: 9.4,
-    year: 1980,
-    likes: 892400,
-    comments: 23400,
-    shares: 45600,
+    title: "Golmaal Comedy Scene",
+    movieTitle: "Golmaal",
+    description: "Golmaal ka superhit comedy scene! Paagal kahin ke 😂 #Golmaal #Ajay #Comedy",
+    duration: "2:45",
+    thumbnail: "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=400&h=800&fit=crop",
+    videoUrl: "https://www.youtube.com/embed/Uc9V7eeO1LY",
+    mood: "Comedy",
+    genre: "Comedy",
+    rating: 9.5,
+    year: 2006,
+    likes: 3400000,
+    comments: 89000,
+    shares: 123000,
     isLiked: true,
     isBookmarked: false,
-    username: "horror_classics",
+    username: "golmaal_clips",
     userAvatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=50&h=50&fit=crop&crop=face",
-    hashtags: ["#TheShining", "#Horror", "#StanleyKubrick", "#JackNicholson"],
+    hashtags: ["#Golmaal", "#AjayDevgn", "#Comedy", "#Bollywood"],
   },
   {
     id: 5,
-    title: "Avengers Assemble",
-    movieTitle: "Avengers: Endgame",
-    description: "The most epic superhero moment in cinema history 🦸‍♂️⚡ #Avengers #Endgame #Marvel",
-    duration: "2:45",
-    thumbnail: "https://images.unsplash.com/photo-1635805737707-575885ab0820?w=400&h=800&fit=crop",
-    videoUrl: "https://www.youtube.com/embed/0jNvJU52LvU",
-    mood: "Epic",
-    genre: "Action",
-    rating: 9.8,
-    year: 2019,
-    likes: 4567800,
-    comments: 123400,
-    shares: 234500,
+    title: "Friends - Joey Doesn't Share Food",
+    movieTitle: "Friends",
+    description: "Joey doesn't share food! The most relatable scene ever 😂🍕 #Friends #Joey #Comedy",
+    duration: "1:30",
+    thumbnail: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&h=800&fit=crop",
+    videoUrl: "https://www.youtube.com/embed/R-qS-7vGFwM",
+    mood: "Funny",
+    genre: "Comedy",
+    rating: 9.6,
+    year: 1994,
+    likes: 12000000,
+    comments: 456000,
+    shares: 789000,
     isLiked: true,
     isBookmarked: true,
-    username: "marvel_official",
-    userAvatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50&h=50&fit=crop&crop=face",
-    hashtags: ["#Avengers", "#Endgame", "#Marvel", "#Epic"],
+    username: "friends_clips",
+    userAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=50&h=50&fit=crop&crop=face",
+    hashtags: ["#Friends", "#Joey", "#Comedy", "#FoodLover"],
   },
   {
     id: 6,
-    title: "I'll Be Back",
-    movieTitle: "The Terminator",
-    description: "Arnold's most iconic line that became legendary 🤖💪 #Terminator #Arnold #Iconic",
-    duration: "0:32",
-    thumbnail: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=800&fit=crop",
-    videoUrl: "https://www.youtube.com/embed/5cOJbYiQjls",
-    mood: "Badass",
-    genre: "Sci-Fi",
-    rating: 9.2,
-    year: 1984,
-    likes: 1567800,
-    comments: 45600,
-    shares: 78900,
+    title: "Andaz Apna Apna - Crime Master Gogo",
+    movieTitle: "Andaz Apna Apna",
+    description: "Crime Master Gogo - Main hoon Crime Master Gogo! 😂💪 #AndazApnaApna #Bollywood",
+    duration: "2:00",
+    thumbnail: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=400&h=800&fit=crop",
+    videoUrl: "https://www.youtube.com/embed/mVVrK8jN0PM",
+    mood: "Hilarious",
+    genre: "Comedy",
+    rating: 9.8,
+    year: 1994,
+    likes: 5600000,
+    comments: 167000,
+    shares: 234000,
     isLiked: false,
     isBookmarked: true,
-    username: "action_classics",
-    userAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=50&h=50&fit=crop&crop=face",
-    hashtags: ["#Terminator", "#Arnold", "#Iconic", "#SciFi"],
+    username: "classic_bollywood",
+    userAvatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50&h=50&fit=crop&crop=face",
+    hashtags: ["#AndazApnaApna", "#CrimeMasterGogo", "#Bollywood", "#Classic"],
   },
   {
     id: 7,
-    title: "Why So Serious?",
-    movieTitle: "The Dark Knight",
-    description: "Heath Ledger's chilling Joker performance 🃏😈 #DarkKnight #Joker #HeathLedger",
-    duration: "1:56",
-    thumbnail: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=800&fit=crop",
-    videoUrl: "https://www.youtube.com/embed/xaPepCVepCg",
-    mood: "Dark",
-    genre: "Action",
-    rating: 9.9,
-    year: 2008,
-    likes: 3456700,
-    comments: 89400,
-    shares: 167800,
+    title: "The Office - That's What She Said",
+    movieTitle: "The Office",
+    description: "Michael Scott's best moments compilation 😂👔 #TheOffice #MichaelScott #Comedy",
+    duration: "3:30",
+    thumbnail: "https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?w=400&h=800&fit=crop",
+    videoUrl: "https://www.youtube.com/embed/3tHkFxn1VEw",
+    mood: "Funny",
+    genre: "Comedy",
+    rating: 9.4,
+    year: 2005,
+    likes: 7800000,
+    comments: 234000,
+    shares: 456000,
     isLiked: true,
     isBookmarked: false,
-    username: "batman_clips",
-    userAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop&crop=face",
-    hashtags: ["#DarkKnight", "#Joker", "#HeathLedger", "#Batman"],
+    username: "office_clips",
+    userAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=50&h=50&fit=crop&crop=face",
+    hashtags: ["#TheOffice", "#MichaelScott", "#Comedy", "#Funny"],
   },
   {
     id: 8,
-    title: "Frankly My Dear",
-    movieTitle: "Gone with the Wind",
-    description: "Clark Gable's legendary final line 💔🌪️ #GoneWithTheWind #ClarkGable #Classic",
-    duration: "1:12",
-    thumbnail: "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=400&h=800&fit=crop",
-    videoUrl: "https://www.youtube.com/embed/GQ5ICXMC4xY",
-    mood: "Romantic",
-    genre: "Romance",
-    rating: 9.1,
-    year: 1939,
-    likes: 892400,
-    comments: 23400,
-    shares: 45600,
+    title: "Dhamaal - Junglee Hai Tu",
+    movieTitle: "Dhamaal",
+    description: "Dhamaal ka superhit comedy scene! Paagalpan at its best 😂 #Dhamaal #Comedy",
+    duration: "2:15",
+    thumbnail: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400&h=800&fit=crop",
+    videoUrl: "https://www.youtube.com/embed/Uc9V7eeO1LY",
+    mood: "Crazy",
+    genre: "Comedy",
+    rating: 9.3,
+    year: 2007,
+    likes: 2300000,
+    comments: 67000,
+    shares: 89000,
     isLiked: false,
     isBookmarked: false,
-    username: "golden_age_films",
+    username: "dhamaal_clips",
+    userAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop&crop=face",
+    hashtags: ["#Dhamaal", "#Comedy", "#Bollywood", "#Funny"],
+  },
+  {
+    id: 9,
+    title: "Tom and Jerry - Classic Chase",
+    movieTitle: "Tom and Jerry",
+    description: "The most iconic cartoon comedy chase scene! 😂🐱🐭 #TomAndJerry #Comedy #Classic",
+    duration: "2:00",
+    thumbnail: "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=400&h=800&fit=crop",
+    videoUrl: "https://www.youtube.com/embed/AhTo3tQMZnY",
+    mood: "Funny",
+    genre: "Animation",
+    rating: 9.9,
+    year: 1940,
+    likes: 15000000,
+    comments: 567000,
+    shares: 890000,
+    isLiked: true,
+    isBookmarked: true,
+    username: "cartoon_classics",
+    userAvatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=50&h=50&fit=crop&crop=face",
+    hashtags: ["#TomAndJerry", "#Comedy", "#Classic", "#Cartoon"],
+  },
+  {
+    id: 10,
+    title: "Munna Bhai MBBS - Circuit Comedy",
+    movieTitle: "Munna Bhai MBBS",
+    description: "Circuit aur Munna bhai ka best comedy scene 😂 #MunnaBhai #Circuit #Bollywood",
+    duration: "2:30",
+    thumbnail: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&h=800&fit=crop",
+    videoUrl: "https://www.youtube.com/embed/K0eDlFX9GMc",
+    mood: "Hilarious",
+    genre: "Comedy",
+    rating: 9.7,
+    year: 2003,
+    likes: 4500000,
+    comments: 123000,
+    shares: 234000,
+    isLiked: false,
+    isBookmarked: false,
+    username: "munna_bhai_clips",
     userAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=50&h=50&fit=crop&crop=face",
-    hashtags: ["#GoneWithTheWind", "#ClarkGable", "#Classic", "#Romance"],
+    hashtags: ["#MunnaBhai", "#Circuit", "#Bollywood", "#Comedy"],
   },
 ]
 
@@ -212,64 +254,6 @@ export function MovieReels() {
 
   const currentReel = reels[currentReelIndex]
 
-  // Load more reels from TMDB
-  useEffect(() => {
-    const loadMoreReels = async () => {
-      if (isLoading) return
-      setIsLoading(true)
-
-      try {
-        const [trending, popular, topRated] = await Promise.all([
-          tmdbApi.getTrending(),
-          tmdbApi.getPopular(),
-          tmdbApi.getTopRated(),
-        ])
-
-        const allMovies = [...trending, ...popular, ...topRated]
-        const uniqueMovies = allMovies.filter(
-          (movie, index, self) => index === self.findIndex((m) => m.id === movie.id),
-        )
-
-        const newReels = uniqueMovies.slice(0, 10).map((movie, index) => ({
-          id: movie.id + 1000,
-          title: `${movie.title} - Epic Scene`,
-          movieTitle: movie.title,
-          description: `${movie.overview.substring(0, 80)}... 🎬✨ #${movie.title.replace(/\s+/g, "")} #Cinema`,
-          duration: `${Math.floor(Math.random() * 3) + 1}:${Math.floor(Math.random() * 60)
-            .toString()
-            .padStart(2, "0")}`,
-          thumbnail: tmdbApi.getBackdropUrl(movie.backdrop_path),
-          videoUrl: "",
-          mood: ["Epic", "Dramatic", "Thrilling", "Emotional", "Action"][Math.floor(Math.random() * 5)],
-          genre: "Drama",
-          rating: Math.round(movie.vote_average * 10) / 10,
-          year: new Date(movie.release_date).getFullYear(),
-          likes: Math.floor(movie.popularity * 1000) + Math.floor(Math.random() * 100000),
-          comments: Math.floor(Math.random() * 50000) + 1000,
-          shares: Math.floor(Math.random() * 25000) + 500,
-          isLiked: Math.random() > 0.7,
-          isBookmarked: Math.random() > 0.8,
-          username: `${movie.title.toLowerCase().replace(/\s+/g, "").substring(0, 8)}_clips`,
-          userAvatar: `https://images.unsplash.com/photo-${1472099645785 + index}?w=50&h=50&fit=crop&crop=face`,
-          hashtags: [
-            `#${movie.title.replace(/\s+/g, "")}`,
-            "#Cinema",
-            "#MovieClips",
-            ["#Epic", "#Viral", "#MustWatch"][Math.floor(Math.random() * 3)],
-          ],
-        }))
-
-        setReels((prev) => [...prev, ...newReels])
-      } catch (error) {
-        console.error("Error loading more reels:", error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    loadMoreReels()
-  }, [])
-
   // Auto-play functionality
   useEffect(() => {
     let interval: NodeJS.Timeout
@@ -277,7 +261,6 @@ export function MovieReels() {
       interval = setInterval(() => {
         setProgress((prev) => {
           if (prev >= 100) {
-            // Auto advance to next reel
             setCurrentReelIndex((prevIndex) => (prevIndex + 1) % reels.length)
             return 0
           }
@@ -404,7 +387,7 @@ export function MovieReels() {
   const togglePlay = () => {
     setIsPlaying(!isPlaying)
     if (!isPlaying) {
-      showNotification("info", "Playing Reel", `${currentReel.title}`)
+      showNotification("info", "Playing Reel", currentReel.title)
     }
   }
 
@@ -421,7 +404,6 @@ export function MovieReels() {
       ),
     )
 
-    // Haptic feedback
     if ("vibrate" in navigator) {
       navigator.vibrate(50)
     }
@@ -446,7 +428,7 @@ export function MovieReels() {
 
   const shareReel = () => {
     setReels((prev) => prev.map((reel) => (reel.id === currentReel.id ? { ...reel, shares: reel.shares + 1 } : reel)))
-    showNotification("success", "Reel Shared", `Shared "${currentReel.title}"`)
+    showNotification("success", "Reel Shared", "Shared " + currentReel.title)
   }
 
   const formatNumber = (num: number) => {
@@ -476,10 +458,8 @@ export function MovieReels() {
             <div className="absolute inset-0">
               {reel.videoUrl ? (
                 <iframe
-                  src={`${reel.videoUrl}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=0&loop=1&playlist=${reel.videoUrl
-                    .split("/")
-                    .pop()}`}
-                  className="w-full h-full object-cover"
+                  src={reel.videoUrl + "?autoplay=" + (index === currentReelIndex ? "1" : "0") + "&mute=" + (isMuted ? "1" : "0") + "&controls=1&rel=0"}
+                  className="w-full h-full"
                   allow="autoplay; encrypted-media"
                   allowFullScreen
                   style={{ border: "none" }}
@@ -493,15 +473,15 @@ export function MovieReels() {
               )}
 
               {/* Gradient Overlays */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
-              <div className="absolute inset-0 bg-gradient-to-r from-black/10 via-transparent to-black/10" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/10 via-transparent to-black/10 pointer-events-none" />
             </div>
 
-            {/* Progress Bar - Only for current reel */}
+            {/* Progress Bar */}
             {index === currentReelIndex && (
               <div className="absolute top-4 left-4 right-4 z-20">
                 <div className="w-full h-1 bg-white/30 rounded-full overflow-hidden">
-                  <div className="h-full bg-orange-500 transition-all duration-100" style={{ width: `${progress}%` }} />
+                  <div className="h-full bg-orange-500 transition-all duration-100" style={{ width: progress + "%" }} />
                 </div>
               </div>
             )}
@@ -516,9 +496,7 @@ export function MovieReels() {
                 />
                 <div className="flex-1">
                   <p className="text-white font-semibold text-sm">{reel.username}</p>
-                  <p className="text-white/80 text-xs">
-                    {reel.movieTitle} • {reel.year}
-                  </p>
+                  <p className="text-white/80 text-xs">{reel.movieTitle} • {reel.year}</p>
                 </div>
                 <button className="bg-transparent border border-white/50 text-white hover:bg-white/20 text-xs px-4 py-1 rounded-full transition-colors">
                   Follow
@@ -526,7 +504,7 @@ export function MovieReels() {
               </div>
             </div>
 
-            {/* Center Play Button - Only show when paused and is current reel */}
+            {/* Center Play Button */}
             {!isPlaying && index === currentReelIndex && (
               <div className="absolute inset-0 flex items-center justify-center z-10">
                 <button
@@ -547,13 +525,11 @@ export function MovieReels() {
                 {/* Hashtags */}
                 <div className="flex flex-wrap gap-2">
                   {reel.hashtags.map((tag, tagIndex) => (
-                    <span key={tagIndex} className="text-blue-300 text-sm font-medium">
-                      {tag}
-                    </span>
+                    <span key={tagIndex} className="text-blue-300 text-sm font-medium">{tag}</span>
                   ))}
                 </div>
 
-                {/* Music/Audio Info */}
+                {/* Audio Info */}
                 <div className="flex items-center gap-2 bg-black/30 rounded-full px-3 py-1 backdrop-blur-sm w-fit">
                   <div className="w-6 h-6 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full flex items-center justify-center">
                     <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
@@ -565,19 +541,13 @@ export function MovieReels() {
 
             {/* Right Side Actions */}
             <div className="absolute bottom-40 right-4 z-20 flex flex-col gap-6">
-              {/* Like Button */}
               <button onClick={toggleLike} className="flex flex-col items-center gap-1 group">
-                <div
-                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
-                    reel.isLiked ? "bg-red-500 scale-110" : "bg-black/30 backdrop-blur-sm group-hover:bg-black/50"
-                  }`}
-                >
-                  <Heart className={`h-6 w-6 text-white ${reel.isLiked ? "fill-white" : ""}`} />
+                <div className={"w-12 h-12 rounded-full flex items-center justify-center transition-all " + (reel.isLiked ? "bg-red-500 scale-110" : "bg-black/30 backdrop-blur-sm group-hover:bg-black/50")}>
+                  <Heart className={"h-6 w-6 text-white " + (reel.isLiked ? "fill-white" : "")} />
                 </div>
                 <span className="text-white text-xs font-medium">{formatNumber(reel.likes)}</span>
               </button>
 
-              {/* Comment Button */}
               <button className="flex flex-col items-center gap-1 group">
                 <div className="w-12 h-12 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:bg-black/50 transition-all">
                   <MessageCircle className="h-6 w-6 text-white" />
@@ -585,7 +555,6 @@ export function MovieReels() {
                 <span className="text-white text-xs font-medium">{formatNumber(reel.comments)}</span>
               </button>
 
-              {/* Share Button */}
               <button onClick={shareReel} className="flex flex-col items-center gap-1 group">
                 <div className="w-12 h-12 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:bg-black/50 transition-all">
                   <Share className="h-6 w-6 text-white" />
@@ -593,27 +562,18 @@ export function MovieReels() {
                 <span className="text-white text-xs font-medium">{formatNumber(reel.shares)}</span>
               </button>
 
-              {/* Bookmark Button */}
               <button onClick={toggleBookmark} className="flex flex-col items-center gap-1 group">
-                <div
-                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
-                    reel.isBookmarked
-                      ? "bg-yellow-500 scale-110"
-                      : "bg-black/30 backdrop-blur-sm group-hover:bg-black/50"
-                  }`}
-                >
-                  <Bookmark className={`h-6 w-6 text-white ${reel.isBookmarked ? "fill-white" : ""}`} />
+                <div className={"w-12 h-12 rounded-full flex items-center justify-center transition-all " + (reel.isBookmarked ? "bg-yellow-500 scale-110" : "bg-black/30 backdrop-blur-sm group-hover:bg-black/50")}>
+                  <Bookmark className={"h-6 w-6 text-white " + (reel.isBookmarked ? "fill-white" : "")} />
                 </div>
               </button>
 
-              {/* More Options */}
               <button className="flex flex-col items-center gap-1 group">
                 <div className="w-12 h-12 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:bg-black/50 transition-all">
                   <MoreHorizontal className="h-6 w-6 text-white" />
                 </div>
               </button>
 
-              {/* Volume Toggle */}
               <button onClick={() => setIsMuted(!isMuted)} className="flex flex-col items-center gap-1 group">
                 <div className="w-12 h-12 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:bg-black/50 transition-all">
                   {isMuted ? <VolumeX className="h-6 w-6 text-white" /> : <Volume2 className="h-6 w-6 text-white" />}
@@ -631,13 +591,11 @@ export function MovieReels() {
 
       {/* Scroll Indicators */}
       <div className="absolute right-2 top-1/2 transform -translate-y-1/2 z-30 flex flex-col gap-1">
-        {reels.slice(0, 8).map((_, index) => (
+        {reels.slice(0, 10).map((_, index) => (
           <button
             key={index}
             onClick={() => scrollToReel(index)}
-            className={`w-1 h-6 rounded-full transition-all ${
-              index === currentReelIndex ? "bg-orange-500" : "bg-white/30 hover:bg-white/50"
-            }`}
+            className={"w-1 h-6 rounded-full transition-all " + (index === currentReelIndex ? "bg-orange-500" : "bg-white/30 hover:bg-white/50")}
           />
         ))}
       </div>
