@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Play, TrendingUp, Clock, Users, Star, Plus, ChevronLeft, ChevronRight, Info } from "lucide-react"
+import { Play, TrendingUp, Clock, Users, Star, Plus, ChevronLeft, ChevronRight, Info, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { useNotification } from "@/components/notification-provider"
@@ -65,6 +65,7 @@ export function HomeView({ setActiveFeature }: HomeViewProps) {
   const [topRatedMovies, setTopRatedMovies] = useState<TMDBMovie[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const { showNotification } = useNotification()
+  const [trailerKey, setTrailerKey] = useState<string | null>(null)
 
   // Load TMDB data
   useEffect(() => {
@@ -127,11 +128,9 @@ export function HomeView({ setActiveFeature }: HomeViewProps) {
         (v: any) => v.type === "Trailer" && v.site === "YouTube"
       )
       if (trailer) {
-        window.open("https://www.youtube.com/watch?v=" + trailer.key, "_blank")
-        showNotification("success", "Playing Trailer", "Opening trailer for " + content.title)
+        setTrailerKey(trailer.key)
       } else {
-        window.open("https://www.youtube.com/results?search_query=" + encodeURIComponent(content.title + " trailer"), "_blank")
-        showNotification("info", "Searching", "Searching YouTube for " + content.title + " trailer")
+        showNotification("info", "No Trailer", "No trailer available for " + content.title)
       }
     } catch (error) {
       showNotification("error", "Error", "Could not load trailer")
@@ -172,6 +171,25 @@ export function HomeView({ setActiveFeature }: HomeViewProps) {
 
   return (
     <div className="space-y-8">
+      {/* Trailer Popup */}
+      {trailerKey && (
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+          <div className="relative w-full max-w-4xl aspect-video">
+            <button
+              onClick={() => setTrailerKey(null)}
+              className="absolute -top-10 right-0 text-white hover:text-orange-400 flex items-center gap-2"
+            >
+              <X className="h-6 w-6" /> Close
+            </button>
+            <iframe
+              src={"https://www.youtube.com/embed/" + trailerKey + "?autoplay=1"}
+              className="w-full h-full rounded-xl"
+              allowFullScreen
+              allow="autoplay"
+            />
+          </div>
+        </div>
+      )}
       {/* Hero Carousel Section */}
       {currentHeroSlide && (
         <div className="relative h-[500px] rounded-xl overflow-hidden">
