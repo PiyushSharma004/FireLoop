@@ -102,8 +102,8 @@ export function MoodDetection() {
   const [analysisProgress, setAnalysisProgress] = useState(0)
   const [moodHistory, setMoodHistory] = useState<Array<{ mood: string; time: string; confidence: number }>>([])
   const [showRecommendations, setShowRecommendations] = useState(false)
-  const [modelsLoaded, setModelsLoaded] = useState(false)
   const [statusText, setStatusText] = useState("")
+  const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || ""
 
   const { isCameraActive, requestCamera, stopCamera, cameraStream } = useCamera()
   const { showNotification } = useNotification()
@@ -116,23 +116,7 @@ export function MoodDetection() {
     }
   }, [cameraStream])
 
-  // ✅ face-api models load karo
-  useEffect(() => {
-    const loadModels = async () => {
-      try {
-        const faceapi = await import("face-api.js")
-        const MODEL_URL = "/FireLoop/models"
-        await Promise.all([
-          faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-          faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
-        ])
-        setModelsLoaded(true)
-      } catch (err) {
-        console.error("Models load error:", err)
-      }
-    }
-    loadModels()
-  }, [])
+  // Gemini API ready — no model loading needed!
 
   const startMoodAnalysis = async () => {
     const cameraGranted = await requestCamera("mood analysis and personalized recommendations")
@@ -141,69 +125,99 @@ export function MoodDetection() {
       return
     }
 
-    if (!modelsLoaded) {
-      showNotification("error", "Models Loading", "Please wait, AI models are still loading...")
-      return
-    }
-
     setStep("scanning")
     setDetectedMood(null)
     setCameraMood(null)
     setAnalysisProgress(0)
     setShowRecommendations(false)
-    showNotification("info", "Analysis Started", "Analyzing your facial expressions...")
+    showNotification("info", "Analysis Started", "Analyzing your facial expressions with Gemini AI...")
 
     const progressInterval = setInterval(() => {
       setAnalysisProgress((prev) => {
-        if (prev >= 90) { clearInterval(progressInterval); return 90 }
-        return prev + 10
+        if (prev >= 85) { clearInterval(progressInterval); return 85 }
+        return prev + 8
       })
     }, 200)
 
-    setTimeout(async () => {
-      try {
-        const faceapi = await import("face-api.js")
-        const video = videoRef.current
-        if (!video) throw new Error("Video not ready")
+    try {
+      const video = videoRef.current
+      if (!video) throw new Error("Video not ready")
 
-        setStatusText("Scanning your face...")
+      setStatusText("Capturing snapshot...")
 
-        const detection = await faceapi
-          .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
-          .withFaceExpressions()
+      // Step 1: Video se snapshot lo (canvas use karke)
+      const canvas = document.createElement("canvas")
+      canvas.width = video.videoWidth || 640
+      canvas.height = video.videoHeight || 480
+      const ctx = canvas.getContext("2d")
+      if (!ctx) throw new Error("Canvas context unavailable")
+      ctx.drawImage(video, 0, 0)
 
-        clearInterval(progressInterval)
-        setAnalysisProgress(100)
+      // Base64 image banao
+      const base64Image = canvas.toDataURL("image/jpeg", 0.8).split(",")[1]
 
-        if (!detection) {
-          showNotification("error", "No Face Detected", "Please make sure your face is visible to the camera")
-          setStep("idle")
-          setStatusText("")
-          return
+      setStatusText("Gemini AI analyzing your mood...")
+
+      // Step 2: Gemini Vision API call
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{
+              parts: [
+                {
+                  inline_data: {
+                    mime_type: "image/jpeg",
+                    data: base64Image
+                  }
+                },
+                {
+                  text: `Analyze this person's facial expression, body language, posture, and overall vibe.
+Determine their current mood from EXACTLY ONE of these options: Happy, Sad, Excited, Calm, Tired, Angry, Romantic, Adventurous.
+
+Also give a confidence score from 0-100.
+
+Respond in this exact JSON format only, no extra text:
+{"mood": "Happy", "confidence": 82, "reason": "bright smile and relaxed posture"}`
+                }
+              ]
+            }],
+            generationConfig: { temperature: 0.2, maxOutputTokens: 100 }
+          })
         }
+      )
 
-        const expressions = detection.expressions
-        const topExpression = Object.entries(expressions).reduce((a, b) => a[1] > b[1] ? a : b)
-        const expressionName = topExpression[0]
-        const expressionScore = Math.round(topExpression[1] * 100)
-        const moodName = expressionToMood[expressionName] || "Calm"
+      const data = await response.json()
+      clearInterval(progressInterval)
+      setAnalysisProgress(100)
 
-        setCameraMood(moodName)
-        setCameraConfidence(expressionScore)
-        setStatusText("")
+      // Gemini response parse karo
+      const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || ""
+      const cleanText = rawText.replace(/```json|```/g, "").trim()
+      const parsed = JSON.parse(cleanText)
 
-        // Step 2: Show the quick question
-        setStep("question")
-        showNotification("info", "Almost there!", "One quick question to perfect your recommendations 🎯")
+      const moodName = parsed.mood as string
+      const moodScore = Math.min(100, Math.max(0, parsed.confidence as number))
 
-      } catch (err) {
-        console.error("Face detection error:", err)
-        showNotification("error", "Detection Failed", "Could not analyze face. Please try again.")
-        setStep("idle")
-        setStatusText("")
-        clearInterval(progressInterval)
-      }
-    }, 2500)
+      // Valid mood check
+      const validMoods = ["Happy", "Sad", "Excited", "Calm", "Tired", "Angry", "Romantic", "Adventurous"]
+      const finalMood = validMoods.includes(moodName) ? moodName : "Calm"
+
+      setCameraMood(finalMood)
+      setCameraConfidence(moodScore)
+      setStatusText("")
+      setStep("question")
+      showNotification("info", "Almost there!", "One quick question to perfect your recommendations 🎯")
+
+    } catch (err) {
+      console.error("Gemini mood detection error:", err)
+      clearInterval(progressInterval)
+      showNotification("error", "Detection Failed", "Could not analyze mood. Check API key or try again.")
+      setStep("idle")
+      setStatusText("")
+    }
   }
 
   // Called when user picks their mood from the quick question
@@ -278,12 +292,7 @@ export function MoodDetection() {
         <p className="text-slate-400 text-lg">
           Advanced facial expression analysis for personalized content recommendations
         </p>
-        {!modelsLoaded && (
-          <p className="text-yellow-400 text-sm mt-2 animate-pulse">⏳ Loading AI models...</p>
-        )}
-        {modelsLoaded && (
-          <p className="text-green-400 text-sm mt-2">✅ AI models ready</p>
-        )}
+        <p className="text-green-400 text-sm mt-2">✅ Powered by Gemini AI — No setup needed</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -469,14 +478,14 @@ export function MoodDetection() {
       {/* Controls */}
       <div className="flex justify-center gap-4">
         {step === "idle" && !isCameraActive && (
-          <Button onClick={startMoodAnalysis} className="bg-orange-500 hover:bg-orange-600" size="lg" disabled={!modelsLoaded}>
+          <Button onClick={startMoodAnalysis} className="bg-orange-500 hover:bg-orange-600" size="lg">
             <Camera className="mr-2 h-5 w-5" />
-            {modelsLoaded ? "Start Mood Analysis" : "Loading AI..."}
+            Start Mood Analysis
           </Button>
         )}
         {step === "idle" && isCameraActive && (
           <div className="flex gap-4">
-            <Button onClick={startMoodAnalysis} className="bg-blue-500 hover:bg-blue-600" size="lg" disabled={!modelsLoaded}>
+            <Button onClick={startMoodAnalysis} className="bg-blue-500 hover:bg-blue-600" size="lg">
               <RefreshCw className="mr-2 h-5 w-5" />
               Analyze Again
             </Button>
@@ -570,6 +579,15 @@ export function MoodDetection() {
     </div>
   )
 }
+
+
+
+
+
+
+
+
+
 
 
 
