@@ -124,6 +124,9 @@ export function MoodDetection() {
       return
     }
 
+    // Camera stream load hone ka wait karo
+    await new Promise(resolve => setTimeout(resolve, 2000))
+
     setStep("scanning")
     setDetectedMood(null)
     setCameraMood(null)
