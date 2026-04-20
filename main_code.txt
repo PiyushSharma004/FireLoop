@@ -1,0 +1,1979 @@
+"use client"
+
+import { useState } from "react"
+import { Camera, Activity, RefreshCw, Zap, Heart, Brain, Star, Play, TrendingUp } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Progress } from "@/components/ui/progress"
+import { useCamera } from "@/components/camera-provider"
+import { useNotification } from "@/components/notification-provider"
+
+const moods = [
+  { name: "Happy", color: "bg-yellow-500", emoji: "😊", description: "Feeling joyful and content" },
+  { name: "Sad", color: "bg-blue-500", emoji: "😢", description: "Feeling down or melancholy" },
+  { name: "Excited", color: "bg-red-500", emoji: "🤩", description: "Full of energy and enthusiasm" },
+  { name: "Calm", color: "bg-green-500", emoji: "😌", description: "Peaceful and relaxed" },
+  { name: "Tired", color: "bg-purple-500", emoji: "😴", description: "Feeling sleepy or exhausted" },
+  { name: "Bored", color: "bg-gray-500", emoji: "😑", description: "Looking for something interesting" },
+  { name: "Romantic", color: "bg-pink-500", emoji: "😍", description: "In the mood for love stories" },
+  { name: "Adventurous", color: "bg-orange-500", emoji: "🤠", description: "Ready for action and thrills" },
+]
+
+// TMDB-inspired movie data with mood-based recommendations
+const moodBasedContent = {
+  Happy: [
+    {
+      id: 1,
+      title: "Ted Lasso",
+      image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=300&h=450&fit=crop",
+      rating: 8.9,
+      year: 2020,
+      genre: "Comedy",
+      description: "An American football coach moves to England to manage a British soccer team.",
+      tmdb_id: 97546,
+    },
+    {
+      id: 2,
+      title: "The Good Place",
+      image: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=300&h=450&fit=crop",
+      rating: 8.2,
+      year: 2016,
+      genre: "Comedy",
+      description: "A woman finds herself in the afterlife and must learn to be a better person.",
+      tmdb_id: 66573,
+    },
+    {
+      id: 3,
+      title: "Parks and Recreation",
+      image: "https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?w=300&h=450&fit=crop",
+      rating: 8.6,
+      year: 2009,
+      genre: "Comedy",
+      description: "A mockumentary about local government in the fictional town of Pawnee, Indiana.",
+      tmdb_id: 8592,
+    },
+    {
+      id: 4,
+      title: "Brooklyn Nine-Nine",
+      image: "https://images.unsplash.com/photo-1489599735734-79b4212bdd26?w=300&h=450&fit=crop",
+      rating: 8.4,
+      year: 2013,
+      genre: "Comedy",
+      description: "Comedy series following the exploits of a talented detective in a New York precinct.",
+      tmdb_id: 48891,
+    },
+  ],
+  Sad: [
+    {
+      id: 5,
+      title: "This Is Us",
+      image: "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=300&h=450&fit=crop",
+      rating: 8.7,
+      year: 2016,
+      genre: "Drama",
+      description: "A heartwarming and emotional story about a unique set of triplets.",
+      tmdb_id: 67136,
+    },
+    {
+      id: 6,
+      title: "The Notebook",
+      image: "https://images.unsplash.com/photo-1489599735734-79b4212bdd26?w=300&h=450&fit=crop",
+      rating: 7.8,
+      year: 2004,
+      genre: "Romance",
+      description: "A poor yet passionate young man falls in love with a rich young woman.",
+      tmdb_id: 11036,
+    },
+    {
+      id: 7,
+      title: "Inside Out",
+      image: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=300&h=450&fit=crop",
+      rating: 8.1,
+      year: 2015,
+      genre: "Animation",
+      description: "After young Riley is uprooted from her Midwest life, her emotions conflict.",
+      tmdb_id: 150540,
+    },
+  ],
+  Excited: [
+    {
+      id: 8,
+      title: "Avengers: Endgame",
+      image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=450&fit=crop",
+      rating: 8.4,
+      year: 2019,
+      genre: "Action",
+      description: "The Avengers assemble once more to reverse Thanos' actions.",
+      tmdb_id: 299534,
+    },
+    {
+      id: 9,
+      title: "Fast & Furious",
+      image: "https://images.unsplash.com/photo-1509248961158-e54f6934749c?w=300&h=450&fit=crop",
+      rating: 7.2,
+      year: 2001,
+      genre: "Action",
+      description: "Los Angeles police officer goes undercover in the racing world.",
+      tmdb_id: 9799,
+    },
+    {
+      id: 10,
+      title: "John Wick",
+      image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=300&h=450&fit=crop",
+      rating: 7.4,
+      year: 2014,
+      genre: "Action",
+      description: "An ex-hitman comes out of retirement to track down the gangsters.",
+      tmdb_id: 245891,
+    },
+  ],
+  Calm: [
+    {
+      id: 11,
+      title: "Studio Ghibli Collection",
+      image: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=300&h=450&fit=crop",
+      rating: 8.6,
+      year: 1988,
+      genre: "Animation",
+      description: "Beautiful animated films that soothe the soul.",
+      tmdb_id: 129,
+    },
+    {
+      id: 12,
+      title: "The Great British Bake Off",
+      image: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=300&h=450&fit=crop",
+      rating: 8.5,
+      year: 2010,
+      genre: "Reality",
+      description: "Amateur bakers compete in a series of rounds.",
+      tmdb_id: 42009,
+    },
+  ],
+  Tired: [
+    {
+      id: 13,
+      title: "Planet Earth",
+      image: "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=300&h=450&fit=crop",
+      rating: 9.4,
+      year: 2006,
+      genre: "Documentary",
+      description: "A nature documentary series featuring the wild places of our planet.",
+      tmdb_id: 1044,
+    },
+    {
+      id: 14,
+      title: "Meditation & Sleep Stories",
+      image: "https://images.unsplash.com/photo-1489599735734-79b4212bdd26?w=300&h=450&fit=crop",
+      rating: 8.0,
+      year: 2020,
+      genre: "Wellness",
+      description: "Calming content to help you relax and unwind.",
+      tmdb_id: 0,
+    },
+  ],
+  Romantic: [
+    {
+      id: 15,
+      title: "Bridgerton",
+      image: "https://images.unsplash.com/photo-1489599735734-79b4212bdd26?w=300&h=450&fit=crop",
+      rating: 7.3,
+      year: 2020,
+      genre: "Romance",
+      description: "The romantic lives of the Bridgerton family in Regency-era England.",
+      tmdb_id: 87108,
+    },
+    {
+      id: 16,
+      title: "Pride and Prejudice",
+      image: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=300&h=450&fit=crop",
+      rating: 8.7,
+      year: 2005,
+      genre: "Romance",
+      description: "Sparks fly when spirited Elizabeth Bennet meets Mr. Darcy.",
+      tmdb_id: 1403,
+    },
+  ],
+  Adventurous: [
+    {
+      id: 17,
+      title: "Indiana Jones",
+      image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=450&fit=crop",
+      rating: 8.5,
+      year: 1981,
+      genre: "Adventure",
+      description: "Archaeologist and adventurer Indiana Jones races to find artifacts.",
+      tmdb_id: 85,
+    },
+    {
+      id: 18,
+      title: "The Lord of the Rings",
+      image: "https://images.unsplash.com/photo-1509248961158-e54f6934749c?w=300&h=450&fit=crop",
+      rating: 8.8,
+      year: 2001,
+      genre: "Fantasy",
+      description: "A meek Hobbit and companions set out to destroy an ancient ring.",
+      tmdb_id: 120,
+    },
+  ],
+  Bored: [
+    {
+      id: 19,
+      title: "Stranger Things",
+      image: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=300&h=450&fit=crop",
+      rating: 8.7,
+      year: 2016,
+      genre: "Sci-Fi",
+      description: "When a young boy vanishes, a small town uncovers supernatural mysteries.",
+      tmdb_id: 66732,
+    },
+    {
+      id: 20,
+      title: "The Office",
+      image: "https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?w=300&h=450&fit=crop",
+      rating: 8.9,
+      year: 2005,
+      genre: "Comedy",
+      description: "A mockumentary on a group of typical office workers.",
+      tmdb_id: 2316,
+    },
+  ],
+}
+
+export function MoodDetection() {
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [detectedMood, setDetectedMood] = useState<string | null>(null)
+  const [confidence, setConfidence] = useState(0)
+  const [analysisProgress, setAnalysisProgress] = useState(0)
+  const [moodHistory, setMoodHistory] = useState<Array<{ mood: string; time: string; confidence: number }>>([])
+  const [showRecommendations, setShowRecommendations] = useState(false)
+  const { isCameraActive, requestCamera, stopCamera } = useCamera()
+  const { showNotification } = useNotification()
+
+  const startMoodAnalysis = async () => {
+    const cameraGranted = await requestCamera("mood analysis and personalized recommendations")
+    if (!cameraGranted) {
+      showNotification("error", "Camera Access Denied", "Please allow camera access for mood detection")
+      return
+    }
+
+    setIsAnalyzing(true)
+    setDetectedMood(null)
+    setAnalysisProgress(0)
+    setShowRecommendations(false)
+    showNotification("info", "Analysis Started", "Analyzing your facial expressions...")
+
+    // Simulate progressive analysis
+    const progressInterval = setInterval(() => {
+      setAnalysisProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(progressInterval)
+          return 100
+        }
+        return prev + 10
+      })
+    }, 200)
+
+    // Simulate AI mood detection with realistic timing
+    setTimeout(() => {
+      const randomMood = moods[Math.floor(Math.random() * moods.length)]
+      const newConfidence = Math.floor(Math.random() * 25) + 75 // 75-100% confidence
+
+      setDetectedMood(randomMood.name)
+      setConfidence(newConfidence)
+      setIsAnalyzing(false)
+      setShowRecommendations(true)
+
+      // Add to history
+      const newEntry = {
+        mood: randomMood.name,
+        time: new Date().toLocaleTimeString(),
+        confidence: newConfidence,
+      }
+      setMoodHistory((prev) => [newEntry, ...prev.slice(0, 4)]) // Keep last 5 entries
+
+      showNotification(
+        "success",
+        "Mood Detected!",
+        `You're feeling ${randomMood.name.toLowerCase()} (${newConfidence}% confidence)`,
+      )
+
+      // Show recommendations after a brief delay
+      setTimeout(() => {
+        showNotification(
+          "info",
+          "Recommendations Ready",
+          `Found ${getRecommendations().length} perfect matches for your mood!`,
+        )
+      }, 1500)
+    }, 3000)
+  }
+
+  const stopAnalysis = () => {
+    setIsAnalyzing(false)
+    stopCamera()
+    setDetectedMood(null)
+    setConfidence(0)
+    setAnalysisProgress(0)
+    setShowRecommendations(false)
+    showNotification("info", "Analysis Stopped", "Mood detection has been stopped")
+  }
+
+  const getRecommendations = () => {
+    if (!detectedMood) return []
+    return moodBasedContent[detectedMood as keyof typeof moodBasedContent] || []
+  }
+
+  const playContent = (content: any) => {
+    showNotification("success", "Now Playing", `Starting ${content.title}`)
+    // Simulate opening content
+    setTimeout(() => {
+      showNotification("info", "TMDB Integration", `Loading from TMDB ID: ${content.tmdb_id}`)
+    }, 1000)
+  }
+
+  const addToWatchlist = (content: any) => {
+    showNotification("success", "Added to Watchlist", `${content.title} has been saved for later`)
+  }
+
+  const currentMood = moods.find((m) => m.name === detectedMood)
+  const recommendations = getRecommendations()
+
+  return (
+    <div className="p-6 max-w-7xl mx-auto space-y-6">
+      <div className="text-center mb-8">
+        <h1 className="text-4xl font-bold mb-4 flex items-center justify-center gap-3">
+          <Brain className="h-10 w-10 text-purple-400" />
+          <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            AI Mood Detection
+          </span>
+        </h1>
+        <p className="text-slate-400 text-lg">
+          Advanced facial expression analysis for personalized content recommendations
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Camera Feed */}
+        <Card className="bg-slate-800 border-slate-700">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Camera className="h-5 w-5" />
+              Live Camera Feed
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="aspect-video bg-slate-900 rounded-lg flex items-center justify-center relative overflow-hidden">
+              {isCameraActive ? (
+                <div className="text-center relative w-full h-full">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10" />
+                  <div className="relative z-10 flex flex-col items-center justify-center h-full">
+                    <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mb-4 animate-pulse">
+                      <Camera className="h-10 w-10 text-green-400" />
+                    </div>
+                    <p className="text-green-400 font-medium">Camera Active</p>
+                    <p className="text-sm text-slate-400 mt-1">AI analyzing facial expressions</p>
+                  </div>
+
+                  {isAnalyzing && (
+                    <div className="absolute inset-0 bg-blue-500/10 flex flex-col items-center justify-center">
+                      <div className="text-center mb-4">
+                        <RefreshCw className="h-12 w-12 animate-spin text-blue-400 mx-auto mb-3" />
+                        <p className="text-blue-400 font-medium">Analyzing expressions...</p>
+                        <p className="text-sm text-slate-400">Please look at the camera</p>
+                      </div>
+                      <div className="w-48">
+                        <Progress value={analysisProgress} className="h-2" />
+                        <p className="text-xs text-center text-slate-400 mt-2">{analysisProgress}% complete</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Simulated face detection overlay */}
+                  {isCameraActive && !isAnalyzing && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-32 h-40 border-2 border-green-400/50 rounded-lg animate-pulse" />
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center">
+                  <Camera className="h-16 w-16 text-slate-600 mx-auto mb-4" />
+                  <p className="text-slate-400">Camera not active</p>
+                  <p className="text-sm text-slate-500 mt-1">Click "Start Analysis" to begin</p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Mood Results */}
+        <Card className="bg-slate-800 border-slate-700">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="h-5 w-5" />
+              Detected Mood
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {detectedMood && currentMood ? (
+              <div className="text-center space-y-4">
+                <div className="text-8xl animate-bounce">{currentMood.emoji}</div>
+                <div>
+                  <h3 className="text-3xl font-bold text-white mb-2">{detectedMood}</h3>
+                  <p className="text-slate-400 mb-2">{currentMood.description}</p>
+                  <div className="flex items-center justify-center gap-2">
+                    <Zap className="h-4 w-4 text-yellow-400" />
+                    <span className="text-yellow-400 font-medium">Confidence: {confidence}%</span>
+                  </div>
+                </div>
+                <div className="w-full bg-slate-700 rounded-full h-3">
+                  <div
+                    className={`h-3 rounded-full ${currentMood.color} transition-all duration-1000`}
+                    style={{ width: `${confidence}%` }}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4 mt-6">
+                  <div className="text-center p-3 bg-slate-700 rounded-lg">
+                    <Heart className="h-6 w-6 text-red-400 mx-auto mb-1" />
+                    <p className="text-sm text-slate-400">Emotional State</p>
+                    <p className="font-medium text-white">{detectedMood}</p>
+                  </div>
+                  <div className="text-center p-3 bg-slate-700 rounded-lg">
+                    <TrendingUp className="h-6 w-6 text-green-400 mx-auto mb-1" />
+                    <p className="text-sm text-slate-400">Recommendations</p>
+                    <p className="font-medium text-white">{recommendations.length} found</p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <Activity className="h-16 w-16 text-slate-600 mx-auto mb-4" />
+                <p className="text-slate-400 text-lg">
+                  {isAnalyzing ? "Analyzing your mood..." : "Start analysis to detect your mood"}
+                </p>
+                {isAnalyzing && (
+                  <div className="mt-4">
+                    <div className="flex justify-center space-x-1">
+                      <div
+                        className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"
+                        style={{ animationDelay: "0ms" }}
+                      ></div>
+                      <div
+                        className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"
+                        style={{ animationDelay: "150ms" }}
+                      ></div>
+                      <div
+                        className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"
+                        style={{ animationDelay: "300ms" }}
+                      ></div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Controls */}
+      <div className="flex justify-center gap-4">
+        {!isCameraActive ? (
+          <Button
+            onClick={startMoodAnalysis}
+            className="bg-orange-500 hover:bg-orange-600"
+            size="lg"
+            disabled={isAnalyzing}
+          >
+            <Camera className="mr-2 h-5 w-5" />
+            Start Mood Analysis
+          </Button>
+        ) : (
+          <div className="flex gap-4">
+            {!isAnalyzing ? (
+              <Button onClick={startMoodAnalysis} className="bg-blue-500 hover:bg-blue-600" size="lg">
+                <RefreshCw className="mr-2 h-5 w-5" />
+                Analyze Again
+              </Button>
+            ) : null}
+            <Button onClick={stopAnalysis} variant="outline" size="lg">
+              Stop Analysis
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {/* Mood History */}
+      {moodHistory.length > 0 && (
+        <Card className="bg-slate-800 border-slate-700">
+          <CardHeader>
+            <CardTitle>Recent Mood History</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {moodHistory.map((entry, index) => {
+                const mood = moods.find((m) => m.name === entry.mood)
+                return (
+                  <div key={index} className="flex items-center justify-between p-3 bg-slate-700 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{mood?.emoji}</span>
+                      <div>
+                        <p className="font-medium text-white">{entry.mood}</p>
+                        <p className="text-sm text-slate-400">{entry.time}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-green-400">{entry.confidence}%</p>
+                      <p className="text-xs text-slate-500">confidence</p>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Mood-based Recommendations */}
+      {showRecommendations && detectedMood && recommendations.length > 0 && (
+        <Card className="bg-slate-800 border-slate-700">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Heart className="h-5 w-5 text-red-400" />
+              Perfect for Your {detectedMood} Mood
+              <span className="text-sm bg-orange-500/20 text-orange-400 px-2 py-1 rounded-full ml-2">
+                {recommendations.length} matches
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {recommendations.map((content) => (
+                <div
+                  key={content.id}
+                  className="bg-slate-700 rounded-lg overflow-hidden hover:scale-105 transition-transform cursor-pointer group"
+                >
+                  <div className="relative aspect-[3/4]">
+                    <img
+                      src={content.image || "/placeholder.svg"}
+                      alt={content.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          className="bg-orange-500 hover:bg-orange-600"
+                          onClick={() => playContent(content)}
+                        >
+                          <Play className="h-4 w-4" />
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => addToWatchlist(content)}>
+                          <Heart className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
+                      <Star className="h-3 w-3 text-yellow-400" />
+                      {content.rating}
+                    </div>
+                    <div className="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
+                      {Math.floor(confidence)}% Match
+                    </div>
+                  </div>
+                  <div className="p-3">
+                    <h3 className="font-medium text-white mb-1">{content.title}</h3>
+                    <p className="text-sm text-slate-400 mb-2">
+                      {content.genre} • {content.year}
+                    </p>
+                    <p className="text-xs text-slate-500 line-clamp-2">{content.description}</p>
+                    <div className="mt-2 text-xs text-slate-600">TMDB ID: {content.tmdb_id}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  )
+}
+"use client"
+
+import type React from "react"
+import { createContext, useContext, useState, useCallback } from "react"
+
+interface CameraContextType {
+  isCameraActive: boolean
+  requestCamera: (reason: string) => Promise<boolean>
+  stopCamera: () => void
+  cameraStream: MediaStream | null
+}
+
+const CameraContext = createContext<CameraContextType | null>(null)
+
+export function CameraProvider({ children }: { children: React.ReactNode }) {
+  const [isCameraActive, setIsCameraActive] = useState(false)
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null)
+
+  const requestCamera = useCallback(
+    async (reason: string): Promise<boolean> => {
+      if (isCameraActive) return true
+
+      const userConsent = window.confirm(
+        `🔥 FireLoop would like to access your camera for: ${reason}\n\nThis helps provide personalized recommendations based on your mood. Allow camera access?`,
+      )
+
+      if (!userConsent) return false
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false,
+        })
+        setCameraStream(stream)
+        setIsCameraActive(true)
+        return true
+      } catch (error) {
+        console.error("Camera access denied:", error)
+        alert(
+          "Camera access was denied. Please enable camera permissions in your browser settings to use mood detection features.",
+        )
+        return false
+      }
+    },
+    [isCameraActive],
+  )
+
+  const stopCamera = useCallback(() => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach((track) => track.stop())
+      setCameraStream(null)
+    }
+    setIsCameraActive(false)
+  }, [cameraStream])
+
+  return (
+    <CameraContext.Provider
+      value={{
+        isCameraActive,
+        requestCamera,
+        stopCamera,
+        cameraStream,
+      }}
+    >
+      {children}
+    </CameraContext.Provider>
+  )
+}
+
+export const useCamera = () => {
+  const context = useContext(CameraContext)
+  if (!context) {
+    throw new Error("useCamera must be used within CameraProvider")
+  }
+  return context
+}
+"use client"
+
+import { Wifi, Battery, Clock } from "lucide-react"
+import { UserProfile } from "@/components/user-profile"
+import { HomeView } from "@/features/home/home-view"
+import { MoodDetection } from "@/features/mood-detection/mood-detection"
+import { FireCall } from "@/features/firecall/firecall"
+import { SharedViewing } from "@/features/shared-viewing/shared-viewing"
+import { VoiceRecall } from "@/features/voice-recall/voice-recall"
+import { MovieReels } from "@/features/movie-reels/movie-reels"
+import { AccessibilityMode } from "@/features/accessibility/accessibility-mode"
+import { FatiguePrevention } from "@/features/fatigue-prevention/fatigue-prevention"
+import { Settings } from "@/features/settings/settings"
+import { useState, useEffect } from "react"
+
+interface MainContentProps {
+  activeFeature: string
+  setActiveFeature: (feature: string) => void
+}
+
+export function MainContent({ activeFeature, setActiveFeature }: MainContentProps) {
+  const [currentTime, setCurrentTime] = useState(new Date())
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date())
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [])
+
+  const renderFeature = () => {
+    switch (activeFeature) {
+      case "home":
+        return <HomeView setActiveFeature={setActiveFeature} />
+      case "mood-detection":
+        return <MoodDetection />
+      case "movie-reels":
+        return <MovieReels />
+      case "shared-viewing":
+        return <SharedViewing />
+      case "firecall":
+        return <FireCall />
+      case "voice-recall":
+        return <VoiceRecall />
+      case "accessibility":
+        return <AccessibilityMode />
+      case "fatigue-prevention":
+        return <FatiguePrevention />
+      case "settings":
+        return <Settings />
+      default:
+        return <HomeView setActiveFeature={setActiveFeature} />
+    }
+  }
+
+  const getFeatureTitle = () => {
+    const featureMap: Record<string, string> = {
+      home: "🏠 Home",
+      "mood-detection": "🧠 Mood Detection",
+      "movie-reels": "🎬 MovieBits",
+      "shared-viewing": "👥 Shared Viewing",
+      firecall: "📞 FireCall",
+      "voice-recall": "🎤 FuzzyFind",
+      accessibility: "♿ Accessibility Mode",
+      "fatigue-prevention": "😴 Fatigue Prevention",
+      settings: "⚙️ Settings",
+    }
+    return featureMap[activeFeature] || "🔥 FireLoop"
+  }
+
+  return (
+    <div className="flex-1 flex flex-col">
+      {/* Top Bar */}
+      <header className="flex items-center justify-between p-4 bg-slate-800 border-b border-slate-700 flex-shrink-0">
+        <div className="flex items-center gap-4">
+          <div>
+            <h2 className="font-semibold text-white text-lg">{getFeatureTitle()}</h2>
+            <p className="text-sm text-slate-400">Emotion-Aware Streaming • AI Powered</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4">
+          {/* System Status */}
+          <div className="hidden lg:flex items-center gap-4 text-sm text-slate-400">
+            <div className="flex items-center gap-2 px-3 py-1 bg-slate-700 rounded-full">
+              <Clock className="h-4 w-4" />
+              <span>{currentTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1 bg-slate-700 rounded-full">
+              <Wifi className="h-4 w-4 text-green-400" />
+              <span className="text-green-400">Connected</span>
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1 bg-slate-700 rounded-full">
+              <Battery className="h-4 w-4 text-blue-400" />
+              <span className="text-blue-400">85%</span>
+            </div>
+          </div>
+
+          {/* User Profile */}
+          <UserProfile setActiveFeature={setActiveFeature} />
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="flex-1 overflow-auto bg-slate-900">{renderFeature()}</main>
+    </div>
+  )
+}
+"use client"
+
+import type React from "react"
+import { createContext, useContext, useState, useCallback } from "react"
+import { X, CheckCircle, AlertCircle, Info } from "lucide-react"
+
+interface Notification {
+  id: string
+  type: "success" | "error" | "info"
+  title: string
+  message: string
+}
+
+interface NotificationContextType {
+  showNotification: (type: "success" | "error" | "info", title: string, message: string) => void
+}
+
+const NotificationContext = createContext<NotificationContextType | null>(null)
+
+export function NotificationProvider({ children }: { children: React.ReactNode }) {
+  const [notifications, setNotifications] = useState<Notification[]>([])
+
+  const showNotification = useCallback((type: "success" | "error" | "info", title: string, message: string) => {
+    const id = Date.now().toString()
+    const notification = { id, type, title, message }
+
+    setNotifications((prev) => [...prev, notification])
+
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+      setNotifications((prev) => prev.filter((n) => n.id !== id))
+    }, 5000)
+  }, [])
+
+  const removeNotification = (id: string) => {
+    setNotifications((prev) => prev.filter((n) => n.id !== id))
+  }
+
+  const getIcon = (type: string) => {
+    switch (type) {
+      case "success":
+        return <CheckCircle className="h-5 w-5 text-green-400" />
+      case "error":
+        return <AlertCircle className="h-5 w-5 text-red-400" />
+      case "info":
+        return <Info className="h-5 w-5 text-blue-400" />
+      default:
+        return <Info className="h-5 w-5 text-blue-400" />
+    }
+  }
+
+  const getBackgroundColor = (type: string) => {
+    switch (type) {
+      case "success":
+        return "bg-green-500/10 border-green-500/20"
+      case "error":
+        return "bg-red-500/10 border-red-500/20"
+      case "info":
+        return "bg-blue-500/10 border-blue-500/20"
+      default:
+        return "bg-blue-500/10 border-blue-500/20"
+    }
+  }
+
+  return (
+    <NotificationContext.Provider value={{ showNotification }}>
+      {children}
+
+      {/* Notifications */}
+      <div className="fixed top-4 right-4 z-50 space-y-2">
+        {notifications.map((notification) => (
+          <div
+            key={notification.id}
+            className={`p-4 rounded-lg border ${getBackgroundColor(notification.type)} backdrop-blur-sm max-w-sm animate-in slide-in-from-right`}
+          >
+            <div className="flex items-start gap-3">
+              {getIcon(notification.type)}
+              <div className="flex-1">
+                <h4 className="font-medium text-white">{notification.title}</h4>
+                <p className="text-sm text-slate-300 mt-1">{notification.message}</p>
+              </div>
+              <button onClick={() => removeNotification(notification.id)} className="text-slate-400 hover:text-white">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </NotificationContext.Provider>
+  )
+}
+
+export const useNotification = () => {
+  const context = useContext(NotificationContext)
+  if (!context) {
+    throw new Error("useNotification must be used within NotificationProvider")
+  }
+  return context
+}
+"use client"
+
+import type React from "react"
+
+import { useState, useRef, useEffect } from "react"
+import { Home, Brain, Users, Phone, Accessibility, Settings, Mic, Camera, Film, GripVertical, Move } from "lucide-react"
+import { Button } from "@/components/ui/button"
+
+interface SidebarProps {
+  activeFeature: string
+  setActiveFeature: (feature: string) => void
+}
+
+const features = [
+  { id: "home", name: "Home", icon: Home, description: "Main dashboard", color: "text-blue-400" },
+  {
+    id: "mood-detection",
+    name: "Mood Detection",
+    icon: Brain,
+    description: "AI emotion analysis",
+    color: "text-purple-400",
+  },
+  {
+    id: "movie-reels",
+    name: "MovieBits",
+    icon: Film,
+    description: "Fun movie scenes",
+    color: "text-pink-400",
+  },
+  {
+    id: "shared-viewing",
+    name: "Shared Viewing",
+    icon: Users,
+    description: "Watch with friends",
+    color: "text-green-400",
+  },
+  { id: "firecall", name: "FireCall", icon: Phone, description: "Video calls", color: "text-blue-400" },
+  {
+    id: "voice-recall",
+    name: "FuzzyFind",
+    icon: Mic,
+    description: "Find movies by voice",
+    color: "text-yellow-400",
+  },
+  {
+    id: "accessibility",
+    name: "Deaf Accessibility",
+    icon: Accessibility,
+    description: "Enhanced accessibility",
+    color: "text-cyan-400",
+  },
+  {
+    id: "fatigue-prevention",
+    name: "Binge Prevention",
+    icon: Camera,
+    description: "Wellness monitoring",
+    color: "text-red-400",
+  },
+  { id: "settings", name: "Settings", icon: Settings, description: "App preferences", color: "text-gray-400" },
+]
+
+export function Sidebar({ activeFeature, setActiveFeature }: SidebarProps) {
+  const [isDragging, setIsDragging] = useState(false)
+  const [position, setPosition] = useState({ x: 0, y: 0 })
+  const [size, setSize] = useState({ width: 320, height: window.innerHeight })
+  const [isResizing, setIsResizing] = useState(false)
+  const [isDetached, setIsDetached] = useState(false)
+  const sidebarRef = useRef<HTMLDivElement>(null)
+  const dragRef = useRef<HTMLDivElement>(null)
+  const resizeRef = useRef<HTMLDivElement>(null)
+
+  // Handle dragging
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDragging && dragRef.current) {
+        const newX = Math.max(0, Math.min(e.clientX - 160, window.innerWidth - size.width))
+        const newY = Math.max(0, Math.min(e.clientY - 30, window.innerHeight - size.height))
+        setPosition({ x: newX, y: newY })
+        setIsDetached(true)
+      }
+
+      if (isResizing && resizeRef.current) {
+        const newWidth = Math.max(280, Math.min(500, e.clientX - position.x))
+        const newHeight = Math.max(400, Math.min(window.innerHeight - position.y, e.clientY - position.y))
+        setSize({ width: newWidth, height: newHeight })
+      }
+    }
+
+    const handleMouseUp = () => {
+      setIsDragging(false)
+      setIsResizing(false)
+    }
+
+    if (isDragging || isResizing) {
+      document.addEventListener("mousemove", handleMouseMove)
+      document.addEventListener("mouseup", handleMouseUp)
+      document.body.style.cursor = isDragging ? "grabbing" : "nw-resize"
+      document.body.style.userSelect = "none"
+    }
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove)
+      document.removeEventListener("mouseup", handleMouseUp)
+      document.body.style.cursor = ""
+      document.body.style.userSelect = ""
+    }
+  }, [isDragging, isResizing, position, size])
+
+  const handleDragStart = (e: React.MouseEvent) => {
+    e.preventDefault()
+    setIsDragging(true)
+  }
+
+  const handleResizeStart = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsResizing(true)
+  }
+
+  const handleDock = () => {
+    setPosition({ x: 0, y: 0 })
+    setSize({ width: 320, height: window.innerHeight })
+    setIsDetached(false)
+  }
+
+  const sidebarStyle = isDetached
+    ? {
+        position: "fixed" as const,
+        left: position.x,
+        top: position.y,
+        width: size.width,
+        height: size.height,
+        zIndex: 60,
+      }
+    : {}
+
+  return (
+    <div
+      ref={sidebarRef}
+      style={sidebarStyle}
+      className={`
+        ${isDetached ? "" : "relative"} 
+        h-full w-80 bg-slate-800 border-r border-slate-700
+        flex flex-col flex-shrink-0
+        ${isDragging ? "shadow-2xl" : ""}
+        ${isDetached ? "rounded-lg shadow-2xl border border-slate-600" : ""}
+      `}
+    >
+      {/* Drag Handle */}
+      <div
+        ref={dragRef}
+        onMouseDown={handleDragStart}
+        className={`
+          flex items-center justify-between p-4 border-b border-slate-700 flex-shrink-0
+          ${isDragging ? "cursor-grabbing" : "cursor-grab"}
+          hover:bg-slate-700/50 transition-colors
+        `}
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Move className="h-4 w-4 text-slate-400" />
+            <div className="text-2xl animate-pulse">🔥</div>
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-orange-400">FireLoop</h1>
+            <p className="text-xs text-slate-500">Emotion-Aware Streaming</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {isDetached && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDock}
+              className="hover:bg-slate-700 text-slate-400 hover:text-white"
+              title="Dock sidebar"
+            >
+              <GripVertical className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* User Profile Section */}
+      <div className="p-4 border-b border-slate-700">
+        <div className="flex items-center gap-3">
+          <img
+            src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=50&h=50&fit=crop&crop=face"
+            alt="Profile"
+            className="w-12 h-12 rounded-full object-cover border-2 border-orange-500/50"
+          />
+          <div>
+            <p className="font-medium text-white">Alex Johnson</p>
+            <p className="text-sm text-slate-400">Movie enthusiast</p>
+            <div className="flex items-center gap-1 mt-1">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <span className="text-xs text-green-400">Online</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation - Scrollable */}
+      <nav className="flex-1 overflow-y-auto p-4 space-y-2 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800">
+        {features.map((feature) => {
+          const Icon = feature.icon
+          return (
+            <button
+              key={feature.id}
+              onClick={() => setActiveFeature(feature.id)}
+              className={`
+                w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left
+                transition-all duration-200 group relative overflow-hidden
+                ${
+                  activeFeature === feature.id
+                    ? "bg-orange-500/20 text-orange-400 border border-orange-500/30 shadow-lg"
+                    : "hover:bg-slate-700 text-slate-300 hover:text-white hover:scale-[1.02]"
+                }
+              `}
+            >
+              <Icon
+                className={`h-5 w-5 flex-shrink-0 ${activeFeature === feature.id ? "text-orange-400" : feature.color}`}
+              />
+              <div className="flex-1 min-w-0">
+                <p className="font-medium truncate">{feature.name}</p>
+                <p className="text-xs text-slate-500 group-hover:text-slate-400 truncate">{feature.description}</p>
+              </div>
+              {activeFeature === feature.id && (
+                <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                  <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
+                </div>
+              )}
+            </button>
+          )
+        })}
+      </nav>
+
+      {/* Quick Actions - Bottom */}
+      <div className="p-4 border-t border-slate-700 flex-shrink-0">
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={() => setActiveFeature("mood-detection")}
+            className="flex items-center justify-center gap-2 p-2 bg-purple-500/20 text-purple-400 rounded-lg hover:bg-purple-500/30 transition-colors text-sm"
+          >
+            <Brain className="h-4 w-4" />
+            <span className="hidden sm:inline">Mood Scan</span>
+          </button>
+          <button
+            onClick={() => setActiveFeature("firecall")}
+            className="flex items-center justify-center gap-2 p-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors text-sm"
+          >
+            <Phone className="h-4 w-4" />
+            <span className="hidden sm:inline">FireCall</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Resize Handle */}
+      {isDetached && (
+        <div
+          ref={resizeRef}
+          onMouseDown={handleResizeStart}
+          className="absolute bottom-0 right-0 w-4 h-4 cursor-nw-resize bg-slate-600 hover:bg-slate-500 transition-colors"
+          style={{
+            clipPath: "polygon(100% 0, 0 100%, 100% 100%)",
+          }}
+        />
+      )}
+    </div>
+  )
+}
+"use client"
+
+import type React from "react"
+import { createContext, useContext, useState, useEffect } from "react"
+
+type Theme = "dark" | "light"
+
+interface ThemeContextType {
+  theme: Theme
+  setTheme: (theme: Theme) => void
+  toggleTheme: () => void
+  volume: number
+  setVolume: (volume: number) => void
+  brightness: number
+  setBrightness: (brightness: number) => void
+}
+
+const ThemeContext = createContext<ThemeContextType | null>(null)
+
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const [theme, setTheme] = useState<Theme>("dark")
+  const [volume, setVolume] = useState(75)
+  const [brightness, setBrightness] = useState(80)
+
+  useEffect(() => {
+    // Load from localStorage on mount
+    const savedTheme = localStorage.getItem("fireloop-theme") as Theme
+    const savedVolume = localStorage.getItem("fireloop-volume")
+    const savedBrightness = localStorage.getItem("fireloop-brightness")
+
+    if (savedTheme) setTheme(savedTheme)
+    if (savedVolume) setVolume(Number.parseInt(savedVolume))
+    if (savedBrightness) setBrightness(Number.parseInt(savedBrightness))
+  }, [])
+
+  useEffect(() => {
+    // Apply theme to document
+    document.documentElement.classList.remove("light", "dark")
+    document.documentElement.classList.add(theme)
+
+    // Apply CSS variables for theme
+    if (theme === "light") {
+      document.documentElement.style.setProperty("--background", "255 255 255")
+      document.documentElement.style.setProperty("--foreground", "15 23 42")
+      document.documentElement.style.setProperty("--card", "248 250 252")
+      document.documentElement.style.setProperty("--card-foreground", "15 23 42")
+      document.documentElement.style.setProperty("--primary", "234 88 12")
+      document.documentElement.style.setProperty("--primary-foreground", "255 255 255")
+      document.documentElement.style.setProperty("--muted", "241 245 249")
+      document.documentElement.style.setProperty("--muted-foreground", "100 116 139")
+      document.documentElement.style.setProperty("--border", "226 232 240")
+    } else {
+      document.documentElement.style.setProperty("--background", "15 23 42")
+      document.documentElement.style.setProperty("--foreground", "248 250 252")
+      document.documentElement.style.setProperty("--card", "30 41 59")
+      document.documentElement.style.setProperty("--card-foreground", "248 250 252")
+      document.documentElement.style.setProperty("--primary", "234 88 12")
+      document.documentElement.style.setProperty("--primary-foreground", "255 255 255")
+      document.documentElement.style.setProperty("--muted", "51 65 85")
+      document.documentElement.style.setProperty("--muted-foreground", "148 163 184")
+      document.documentElement.style.setProperty("--border", "51 65 85")
+    }
+
+    // Apply brightness filter
+    document.documentElement.style.filter = `brightness(${brightness}%)`
+
+    // Store in localStorage
+    localStorage.setItem("fireloop-theme", theme)
+    localStorage.setItem("fireloop-volume", volume.toString())
+    localStorage.setItem("fireloop-brightness", brightness.toString())
+  }, [theme, brightness, volume])
+
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark")
+  }
+
+  return (
+    <ThemeContext.Provider
+      value={{
+        theme,
+        setTheme,
+        toggleTheme,
+        volume,
+        setVolume,
+        brightness,
+        setBrightness,
+      }}
+    >
+      {children}
+    </ThemeContext.Provider>
+  )
+}
+
+export const useTheme = () => {
+  const context = useContext(ThemeContext)
+  if (!context) {
+    throw new Error("useTheme must be used within ThemeProvider")
+  }
+  return context
+}
+"use client"
+
+import { Moon, Sun } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { useTheme } from "@/components/theme-provider"
+
+export function ThemeToggle() {
+  const { theme, setTheme } = useTheme()
+
+  return (
+    <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
+        <h3 className="text-sm font-medium text-foreground">Theme</h3>
+        <p className="text-xs text-muted-foreground">Choose your preferred theme</p>
+      </div>
+      <div className="flex gap-1">
+        <Button
+          size="sm"
+          variant={theme === "dark" ? "default" : "outline"}
+          onClick={() => setTheme("dark")}
+          className={`w-10 h-10 p-0 ${
+            theme === "dark" ? "bg-orange-500 hover:bg-orange-600 text-white" : "hover:bg-muted"
+          }`}
+        >
+          <Moon className="h-4 w-4" />
+        </Button>
+        <Button
+          size="sm"
+          variant={theme === "light" ? "default" : "outline"}
+          onClick={() => setTheme("light")}
+          className={`w-10 h-10 p-0 ${
+            theme === "light" ? "bg-orange-500 hover:bg-orange-600 text-white" : "hover:bg-muted"
+          }`}
+        >
+          <Sun className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  )
+}
+"use client"
+
+import type React from "react"
+
+import { useState, useRef } from "react"
+import {
+  User,
+  Settings,
+  LogOut,
+  Camera,
+  Edit3,
+  Heart,
+  Clock,
+  TrendingUp,
+  Upload,
+  Check,
+  X,
+  ImageIcon,
+} from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { useNotification } from "@/components/notification-provider"
+
+interface UserProfileProps {
+  setActiveFeature: (feature: string) => void
+}
+
+// Preset avatar options
+const presetAvatars = [
+  "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop&crop=face",
+]
+
+export function UserProfile({ setActiveFeature }: UserProfileProps) {
+  const [isOpen, setIsOpen] = useState(false)
+  const [isEditingProfile, setIsEditingProfile] = useState(false)
+  const [isEditingAvatar, setIsEditingAvatar] = useState(false)
+  const [userName, setUserName] = useState("Alex Johnson")
+  const [userBio, setUserBio] = useState("Movie enthusiast & AI explorer")
+  const [userAvatar, setUserAvatar] = useState(presetAvatars[0])
+  const [tempUserName, setTempUserName] = useState(userName)
+  const [tempUserBio, setTempUserBio] = useState(userBio)
+  const [tempUserAvatar, setTempUserAvatar] = useState(userAvatar)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const { showNotification } = useNotification()
+
+  const userStats = {
+    watchTime: "127 hours",
+    favoriteGenre: "Sci-Fi",
+    moodDetections: 45,
+    friendsConnected: 12,
+  }
+
+  const recentActivity = [
+    { action: "Watched", content: "Stranger Things S4", time: "2 hours ago", mood: "Excited" },
+    { action: "Added to Watchlist", content: "The Bear", time: "1 day ago", mood: "Happy" },
+    { action: "Completed", content: "Ted Lasso", time: "3 days ago", mood: "Uplifting" },
+  ]
+
+  const handleStartEdit = () => {
+    setTempUserName(userName)
+    setTempUserBio(userBio)
+    setTempUserAvatar(userAvatar)
+    setIsEditingProfile(true)
+    setIsOpen(false)
+  }
+
+  const handleSaveProfile = () => {
+    setUserName(tempUserName)
+    setUserBio(tempUserBio)
+    setUserAvatar(tempUserAvatar)
+    setIsEditingProfile(false)
+    setIsEditingAvatar(false)
+    showNotification("success", "Profile Updated", "Your profile has been saved successfully!")
+  }
+
+  const handleCancelEdit = () => {
+    setTempUserName(userName)
+    setTempUserBio(userBio)
+    setTempUserAvatar(userAvatar)
+    setIsEditingProfile(false)
+    setIsEditingAvatar(false)
+  }
+
+  const handleAvatarSelect = (avatarUrl: string) => {
+    setTempUserAvatar(avatarUrl)
+    setIsEditingAvatar(false)
+    showNotification("info", "Avatar Selected", "Don't forget to save your changes!")
+  }
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      // Check file type
+      if (!file.type.startsWith("image/")) {
+        showNotification("error", "Invalid File", "Please select an image file (JPG, PNG, GIF)")
+        return
+      }
+
+      // Check file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        showNotification("error", "File Too Large", "Please select an image smaller than 5MB")
+        return
+      }
+
+      // Create object URL for preview
+      const objectUrl = URL.createObjectURL(file)
+      setTempUserAvatar(objectUrl)
+      setIsEditingAvatar(false)
+      showNotification("success", "Photo Uploaded", "Custom photo uploaded! Don't forget to save.")
+    }
+  }
+
+  const handleCustomUpload = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleSignOut = () => {
+    showNotification("info", "Signing Out", "See you next time!")
+    // Simulate sign out
+  }
+
+  // Avatar Selection Modal
+  if (isEditingAvatar) {
+    return (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <Card className="bg-slate-800 border-slate-700 max-w-lg w-full max-h-[80vh] overflow-y-auto">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <Camera className="h-5 w-5" />
+                Choose Your Avatar
+              </span>
+              <Button variant="ghost" size="sm" onClick={() => setIsEditingAvatar(false)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Current Selection */}
+            <div className="text-center">
+              <div className="relative inline-block">
+                <img
+                  src={tempUserAvatar || "/placeholder.svg"}
+                  alt="Selected Avatar"
+                  className="w-20 h-20 rounded-full object-cover border-4 border-orange-500 mx-auto"
+                />
+                <div className="absolute -bottom-1 -right-1 bg-green-500 text-white p-1 rounded-full">
+                  <Check className="h-3 w-3" />
+                </div>
+              </div>
+              <p className="text-sm text-slate-400 mt-2">Current Selection</p>
+            </div>
+
+            {/* Upload Custom Photo */}
+            <div className="text-center p-4 border-2 border-dashed border-slate-600 rounded-lg hover:border-orange-500 transition-colors">
+              <div className="relative">
+                <img
+                  src="/images/photo-upload-reference.png"
+                  alt="Upload Reference"
+                  className="w-16 h-16 mx-auto mb-2 rounded-full opacity-50"
+                />
+                <Upload className="h-8 w-8 text-slate-400 mx-auto mb-2 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+              </div>
+              <p className="text-sm text-slate-400 mb-3">Upload your own photo</p>
+              <Button onClick={handleCustomUpload} className="bg-orange-500 hover:bg-orange-600">
+                <ImageIcon className="h-4 w-4 mr-2" />
+                Choose File
+              </Button>
+              <p className="text-xs text-slate-500 mt-2">JPG, PNG, GIF up to 5MB</p>
+
+              {/* Hidden file input */}
+              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+            </div>
+
+            {/* Preset Avatars */}
+            <div>
+              <h4 className="text-sm font-medium text-white mb-3">Choose from presets:</h4>
+              <div className="grid grid-cols-5 gap-3">
+                {presetAvatars.map((avatar, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleAvatarSelect(avatar)}
+                    className={`relative group ${tempUserAvatar === avatar ? "ring-2 ring-orange-500" : ""}`}
+                  >
+                    <img
+                      src={avatar || "/placeholder.svg"}
+                      alt={`Avatar ${index + 1}`}
+                      className="w-16 h-16 rounded-full object-cover hover:scale-110 transition-transform"
+                    />
+                    {tempUserAvatar === avatar && (
+                      <div className="absolute inset-0 bg-orange-500/20 rounded-full flex items-center justify-center">
+                        <Check className="h-4 w-4 text-orange-400" />
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <Button onClick={() => setIsEditingAvatar(false)} variant="outline" className="flex-1">
+                Cancel
+              </Button>
+              <Button onClick={() => setIsEditingAvatar(false)} className="flex-1 bg-orange-500 hover:bg-orange-600">
+                Confirm Selection
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Profile Edit Modal
+  if (isEditingProfile) {
+    return (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <Card className="bg-slate-800 border-slate-700 max-w-md w-full">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <Edit3 className="h-5 w-5" />
+                Edit Profile
+              </span>
+              <Button variant="ghost" size="sm" onClick={handleCancelEdit}>
+                <X className="h-4 w-4" />
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Avatar Section */}
+            <div className="text-center">
+              <div className="relative inline-block">
+                <img
+                  src={tempUserAvatar || "/placeholder.svg"}
+                  alt="Profile"
+                  className="w-24 h-24 rounded-full object-cover border-4 border-orange-500"
+                />
+                <button
+                  onClick={() => setIsEditingAvatar(true)}
+                  className="absolute -bottom-2 -right-2 bg-orange-500 text-white p-2 rounded-full hover:bg-orange-600 transition-colors shadow-lg"
+                >
+                  <Camera className="h-4 w-4" />
+                </button>
+              </div>
+              <p className="text-sm text-slate-400 mt-2">Click camera to change photo</p>
+            </div>
+
+            {/* Name Input */}
+            <div>
+              <label className="text-sm text-slate-400 mb-2 block">Display Name</label>
+              <Input
+                value={tempUserName}
+                onChange={(e) => setTempUserName(e.target.value)}
+                className="bg-slate-700 border-slate-600 text-white"
+                placeholder="Enter your name"
+                maxLength={30}
+              />
+              <p className="text-xs text-slate-500 mt-1">{tempUserName.length}/30 characters</p>
+            </div>
+
+            {/* Bio Input */}
+            <div>
+              <label className="text-sm text-slate-400 mb-2 block">Bio</label>
+              <Input
+                value={tempUserBio}
+                onChange={(e) => setTempUserBio(e.target.value)}
+                className="bg-slate-700 border-slate-600 text-white"
+                placeholder="Tell us about yourself"
+                maxLength={50}
+              />
+              <p className="text-xs text-slate-500 mt-1">{tempUserBio.length}/50 characters</p>
+            </div>
+
+            {/* Preview */}
+            <div className="p-4 bg-slate-700 rounded-lg">
+              <p className="text-sm text-slate-400 mb-2">Preview:</p>
+              <div className="flex items-center gap-3">
+                <img
+                  src={tempUserAvatar || "/placeholder.svg"}
+                  alt="Preview"
+                  className="w-12 h-12 rounded-full object-cover border-2 border-orange-500/50"
+                />
+                <div>
+                  <p className="font-medium text-white">{tempUserName || "Your Name"}</p>
+                  <p className="text-sm text-slate-400">{tempUserBio || "Your bio"}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <Button onClick={handleCancelEdit} variant="outline" className="flex-1">
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSaveProfile}
+                className="flex-1 bg-orange-500 hover:bg-orange-600"
+                disabled={!tempUserName.trim()}
+              >
+                <Check className="h-4 w-4 mr-2" />
+                Save Changes
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  return (
+    <div className="relative">
+      {/* Profile Picture Button */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-2 p-1 rounded-full hover:bg-slate-700 transition-colors"
+      >
+        <img
+          src={userAvatar || "/placeholder.svg"}
+          alt="Profile"
+          className="w-10 h-10 rounded-full object-cover border-2 border-orange-500/50 hover:border-orange-500 transition-colors"
+        />
+        <div className="hidden md:block text-left">
+          <p className="text-sm font-medium text-white">{userName}</p>
+          <p className="text-xs text-slate-400">Online</p>
+        </div>
+      </button>
+
+      {/* Dropdown Menu */}
+      {isOpen && (
+        <>
+          {/* Overlay */}
+          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+
+          {/* Dropdown */}
+          <div className="absolute right-0 top-full mt-2 w-80 bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-50 overflow-hidden">
+            {/* Profile Header */}
+            <div className="p-4 bg-gradient-to-r from-orange-500/20 to-red-500/20 border-b border-slate-700">
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <img
+                    src={userAvatar || "/placeholder.svg"}
+                    alt="Profile"
+                    className="w-16 h-16 rounded-full object-cover border-3 border-orange-500"
+                  />
+                  <button
+                    onClick={handleStartEdit}
+                    className="absolute -bottom-1 -right-1 bg-slate-700 text-white p-1 rounded-full hover:bg-slate-600 transition-colors"
+                  >
+                    <Edit3 className="h-3 w-3" />
+                  </button>
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-white text-lg">{userName}</h3>
+                  <p className="text-slate-300 text-sm">{userBio}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-xs text-green-400">Online</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Stats */}
+            <div className="p-4 border-b border-slate-700">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="text-center p-2 bg-slate-700 rounded-lg">
+                  <Clock className="h-4 w-4 text-blue-400 mx-auto mb-1" />
+                  <p className="text-xs text-slate-400">Watch Time</p>
+                  <p className="text-sm font-medium text-white">{userStats.watchTime}</p>
+                </div>
+                <div className="text-center p-2 bg-slate-700 rounded-lg">
+                  <Heart className="h-4 w-4 text-red-400 mx-auto mb-1" />
+                  <p className="text-xs text-slate-400">Favorite</p>
+                  <p className="text-sm font-medium text-white">{userStats.favoriteGenre}</p>
+                </div>
+                <div className="text-center p-2 bg-slate-700 rounded-lg">
+                  <TrendingUp className="h-4 w-4 text-purple-400 mx-auto mb-1" />
+                  <p className="text-xs text-slate-400">Mood Scans</p>
+                  <p className="text-sm font-medium text-white">{userStats.moodDetections}</p>
+                </div>
+                <div className="text-center p-2 bg-slate-700 rounded-lg">
+                  <User className="h-4 w-4 text-green-400 mx-auto mb-1" />
+                  <p className="text-xs text-slate-400">Friends</p>
+                  <p className="text-sm font-medium text-white">{userStats.friendsConnected}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Recent Activity */}
+            <div className="p-4 border-b border-slate-700">
+              <h4 className="text-sm font-medium text-white mb-3">Recent Activity</h4>
+              <div className="space-y-2">
+                {recentActivity.map((activity, index) => (
+                  <div key={index} className="flex items-center gap-3 p-2 bg-slate-700/50 rounded-lg">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full flex-shrink-0"></div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-white">
+                        <span className="text-slate-400">{activity.action}</span> {activity.content}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-slate-500">{activity.time}</span>
+                        <span className="text-xs bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded">
+                          {activity.mood}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Menu Items */}
+            <div className="p-2">
+              <button
+                onClick={handleStartEdit}
+                className="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-slate-700 rounded-lg transition-colors"
+              >
+                <Edit3 className="h-4 w-4 text-slate-400" />
+                <span className="text-white">Edit Profile</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setActiveFeature("settings")
+                  setIsOpen(false)
+                }}
+                className="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-slate-700 rounded-lg transition-colors"
+              >
+                <Settings className="h-4 w-4 text-slate-400" />
+                <span className="text-white">Settings</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  handleSignOut()
+                  setIsOpen(false)
+                }}
+                className="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-slate-700 rounded-lg transition-colors text-red-400 hover:text-red-300"
+              >
+                <LogOut className="h-4 w-4" />
+                <span>Sign Out</span>
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+import type React from "react"
+import type { Metadata } from "next"
+import "./globals.css"
+
+export const metadata: Metadata = {
+  title: "🔥 FireLoop - Emotion-Aware Streaming",
+  description: "Smart streaming interface with AI-powered mood detection and personalized recommendations",
+  keywords: ["streaming", "AI", "mood detection", "entertainment", "FireLoop"],
+}
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode
+}>) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  )
+}
+"use client"
+
+import { useState, useEffect } from "react"
+import { Sidebar } from "@/components/sidebar"
+import { MainContent } from "@/components/main-content"
+import { CameraProvider } from "@/components/camera-provider"
+import { NotificationProvider } from "@/components/notification-provider"
+import { ThemeProvider } from "@/components/theme-provider"
+
+export default function FireLoopApp() {
+  const [activeFeature, setActiveFeature] = useState("home")
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    document.title = "🔥 FireLoop - Emotion-Aware Streaming"
+  }, [])
+
+  useEffect(() => {
+    // Simulate app initialization
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+    }, 2000)
+
+    return () => clearTimeout(timer)
+  }, [])
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4">🔥</div>
+          <h1 className="text-3xl font-bold text-orange-400 mb-2">FireLoop</h1>
+          <p className="text-slate-400">Loading your emotion-aware experience...</p>
+          <div className="mt-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-400 mx-auto"></div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <ThemeProvider>
+      <NotificationProvider>
+        <CameraProvider>
+          <div className="min-h-screen bg-slate-900 text-white overflow-hidden">
+            <div className="flex h-screen">
+              {/* Always visible sidebar */}
+              <Sidebar activeFeature={activeFeature} setActiveFeature={setActiveFeature} />
+
+              {/* Main content area */}
+              <MainContent activeFeature={activeFeature} setActiveFeature={setActiveFeature} />
+            </div>
+          </div>
+        </CameraProvider>
+      </NotificationProvider>
+    </ThemeProvider>
+  )
+}
+import * as React from "react"
+
+const MOBILE_BREAKPOINT = 768
+
+export function useIsMobile() {
+  const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined)
+
+  React.useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
+    const onChange = () => {
+      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
+    }
+    mql.addEventListener("change", onChange)
+    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
+    return () => mql.removeEventListener("change", onChange)
+  }, [])
+
+  return !!isMobile
+}
+const TMDB_API_KEY = "1a2b3261a20c9a5650f3e890b8c8668c"
+const TMDB_BASE_URL = "https://api.themoviedb.org/3"
+const TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500"
+
+export interface TMDBMovie {
+  id: number
+  title: string
+  overview: string
+  poster_path: string
+  backdrop_path: string
+  release_date: string
+  vote_average: number
+  genre_ids: number[]
+  popularity: number
+}
+
+export interface TMDBGenre {
+  id: number
+  name: string
+}
+
+export const tmdbApi = {
+  // Get trending movies
+  getTrending: async (): Promise<TMDBMovie[]> => {
+    try {
+      const response = await fetch(`${TMDB_BASE_URL}/trending/movie/week?api_key=${TMDB_API_KEY}`)
+      const data = await response.json()
+      return data.results || []
+    } catch (error) {
+      console.error("Error fetching trending movies:", error)
+      return []
+    }
+  },
+
+  // Get popular movies
+  getPopular: async (): Promise<TMDBMovie[]> => {
+    try {
+      const response = await fetch(`${TMDB_BASE_URL}/movie/popular?api_key=${TMDB_API_KEY}`)
+      const data = await response.json()
+      return data.results || []
+    } catch (error) {
+      console.error("Error fetching popular movies:", error)
+      return []
+    }
+  },
+
+  // Get top rated movies
+  getTopRated: async (): Promise<TMDBMovie[]> => {
+    try {
+      const response = await fetch(`${TMDB_BASE_URL}/movie/top_rated?api_key=${TMDB_API_KEY}`)
+      const data = await response.json()
+      return data.results || []
+    } catch (error) {
+      console.error("Error fetching top rated movies:", error)
+      return []
+    }
+  },
+
+  // Search movies
+  searchMovies: async (query: string): Promise<TMDBMovie[]> => {
+    try {
+      const response = await fetch(
+        `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}`,
+      )
+      const data = await response.json()
+      return data.results || []
+    } catch (error) {
+      console.error("Error searching movies:", error)
+      return []
+    }
+  },
+
+  // Get movie details
+  getMovieDetails: async (movieId: number) => {
+    try {
+      const response = await fetch(`${TMDB_BASE_URL}/movie/${movieId}?api_key=${TMDB_API_KEY}`)
+      return await response.json()
+    } catch (error) {
+      console.error("Error fetching movie details:", error)
+      return null
+    }
+  },
+
+  // Get genres
+  getGenres: async (): Promise<TMDBGenre[]> => {
+    try {
+      const response = await fetch(`${TMDB_BASE_URL}/genre/movie/list?api_key=${TMDB_API_KEY}`)
+      const data = await response.json()
+      return data.genres || []
+    } catch (error) {
+      console.error("Error fetching genres:", error)
+      return []
+    }
+  },
+
+  // Get movies by genre
+  getMoviesByGenre: async (genreId: number): Promise<TMDBMovie[]> => {
+    try {
+      const response = await fetch(`${TMDB_BASE_URL}/discover/movie?api_key=${TMDB_API_KEY}&with_genres=${genreId}`)
+      const data = await response.json()
+      return data.results || []
+    } catch (error) {
+      console.error("Error fetching movies by genre:", error)
+      return []
+    }
+  },
+
+  // Get image URL
+  getImageUrl: (path: string, size = "w500"): string => {
+    if (!path) return "/placeholder.svg?height=300&width=200"
+    return `https://image.tmdb.org/t/p/${size}${path}`
+  },
+
+  // Get backdrop URL
+  getBackdropUrl: (path: string, size = "w1280"): string => {
+    if (!path) return "/placeholder.svg?height=600&width=1200"
+    return `https://image.tmdb.org/t/p/${size}${path}`
+  },
+}
+import { type ClassValue, clsx } from "clsx"
+import { twMerge } from "tailwind-merge"
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}

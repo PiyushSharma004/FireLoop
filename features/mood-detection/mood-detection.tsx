@@ -1,6 +1,7 @@
+
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Camera, Activity, RefreshCw, Zap, Heart, Brain, Star, Play, TrendingUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -246,8 +247,18 @@ export function MoodDetection() {
   const [analysisProgress, setAnalysisProgress] = useState(0)
   const [moodHistory, setMoodHistory] = useState<Array<{ mood: string; time: string; confidence: number }>>([])
   const [showRecommendations, setShowRecommendations] = useState(false)
-  const { isCameraActive, requestCamera, stopCamera } = useCamera()
+  const { isCameraActive, requestCamera, stopCamera, cameraStream } = useCamera()
   const { showNotification } = useNotification()
+
+  // ✅ VIDEO REF — real camera feed ke liye
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  // ✅ Jab bhi cameraStream aaye, video element mein set karo
+  useEffect(() => {
+    if (videoRef.current && cameraStream) {
+      videoRef.current.srcObject = cameraStream
+    }
+  }, [cameraStream])
 
   const startMoodAnalysis = async () => {
     const cameraGranted = await requestCamera("mood analysis and personalized recommendations")
@@ -325,7 +336,6 @@ export function MoodDetection() {
 
   const playContent = (content: any) => {
     showNotification("success", "Now Playing", `Starting ${content.title}`)
-    // Simulate opening content
     setTimeout(() => {
       showNotification("info", "TMDB Integration", `Loading from TMDB ID: ${content.tmdb_id}`)
     }, 1000)
@@ -364,34 +374,36 @@ export function MoodDetection() {
           <CardContent>
             <div className="aspect-video bg-slate-900 rounded-lg flex items-center justify-center relative overflow-hidden">
               {isCameraActive ? (
-                <div className="text-center relative w-full h-full">
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10" />
-                  <div className="relative z-10 flex flex-col items-center justify-center h-full">
-                    <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mb-4 animate-pulse">
-                      <Camera className="h-10 w-10 text-green-400" />
-                    </div>
-                    <p className="text-green-400 font-medium">Camera Active</p>
-                    <p className="text-sm text-slate-400 mt-1">AI analyzing facial expressions</p>
-                  </div>
+                <div className="relative w-full h-full">
 
+                  {/* ✅ REAL CAMERA FEED */}
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="w-full h-full object-cover rounded-lg"
+                  />
+
+                  {/* Analyzing overlay */}
                   {isAnalyzing && (
-                    <div className="absolute inset-0 bg-blue-500/10 flex flex-col items-center justify-center">
+                    <div className="absolute inset-0 bg-blue-500/20 flex flex-col items-center justify-center rounded-lg">
                       <div className="text-center mb-4">
                         <RefreshCw className="h-12 w-12 animate-spin text-blue-400 mx-auto mb-3" />
                         <p className="text-blue-400 font-medium">Analyzing expressions...</p>
-                        <p className="text-sm text-slate-400">Please look at the camera</p>
+                        <p className="text-sm text-slate-300">Please look at the camera</p>
                       </div>
                       <div className="w-48">
                         <Progress value={analysisProgress} className="h-2" />
-                        <p className="text-xs text-center text-slate-400 mt-2">{analysisProgress}% complete</p>
+                        <p className="text-xs text-center text-slate-300 mt-2">{analysisProgress}% complete</p>
                       </div>
                     </div>
                   )}
 
-                  {/* Simulated face detection overlay */}
+                  {/* Face detection box overlay */}
                   {isCameraActive && !isAnalyzing && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-32 h-40 border-2 border-green-400/50 rounded-lg animate-pulse" />
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="w-32 h-40 border-2 border-green-400/70 rounded-lg animate-pulse" />
                     </div>
                   )}
                 </div>
@@ -454,18 +466,9 @@ export function MoodDetection() {
                 {isAnalyzing && (
                   <div className="mt-4">
                     <div className="flex justify-center space-x-1">
-                      <div
-                        className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"
-                        style={{ animationDelay: "0ms" }}
-                      ></div>
-                      <div
-                        className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"
-                        style={{ animationDelay: "150ms" }}
-                      ></div>
-                      <div
-                        className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"
-                        style={{ animationDelay: "300ms" }}
-                      ></div>
+                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
+                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
+                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
                     </div>
                   </div>
                 )}
@@ -597,3 +600,598 @@ export function MoodDetection() {
     </div>
   )
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
