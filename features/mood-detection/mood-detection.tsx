@@ -139,15 +139,15 @@ export function MoodDetection() {
     }, 200)
 
     try {
-      const video = videoRef.current
-      if (!video) throw new Error("Video not ready")
-
-      // Wait for video to be actually playing
-      await new Promise<void>((resolve, reject) => {
-        if (video.readyState >= 2) { resolve(); return }
-        video.onloadeddata = () => resolve()
-        setTimeout(() => reject(new Error("Video not ready")), 8000)
-      })
+      //Wait for camera to be ready
+      let video = videoRef.current
+      let attempts = 0
+      while ((!video || !video.videoWidth || video.videoWidth === 0) && attempts < 20) {
+        await new Promise(resolve => setTimeout(resolve, 500))
+        video = videoRef.current
+        attempts++
+      }
+      if (!video || !video.videoWidth) throw new Error("Video not ready")
 
       setStatusText("Capturing snapshot...")
 
