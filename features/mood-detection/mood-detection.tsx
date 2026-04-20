@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect, useRef } from "react"
@@ -63,7 +64,6 @@ const expressionToMood: Record<string, string> = {
   fearful: "Adventurous",
 }
 
-// Quick question options shown after camera scan
 const quickMoodOptions = [
   { label: "😊 Khush / Happy", value: "Happy" },
   { label: "😢 Udaas / Sad", value: "Sad" },
@@ -75,17 +75,10 @@ const quickMoodOptions = [
   { label: "🤠 Adventurous", value: "Adventurous" },
 ]
 
-// Combine camera mood + user-selected mood
-// Camera scan gives us a base, user answer refines it
-// If user confirms camera mood → confidence boost
-// If user picks different mood → user answer wins (more accurate)
 function combineMoods(cameraMood: string, userMood: string, cameraConfidence: number): { mood: string; confidence: number } {
   if (cameraMood === userMood) {
-    // Both agree — higher confidence
     return { mood: userMood, confidence: Math.min(100, Math.round(cameraConfidence * 1.15)) }
   } else {
-    // User answer overrides camera (user knows their mood better)
-    // Confidence is averaged: camera gave some signal, user confirmed differently
     return { mood: userMood, confidence: Math.min(100, Math.round((cameraConfidence + 85) / 2)) }
   }
 }
@@ -102,7 +95,7 @@ export function MoodDetection() {
   const [moodHistory, setMoodHistory] = useState<Array<{ mood: string; time: string; confidence: number }>>([])
   const [showRecommendations, setShowRecommendations] = useState(false)
   const [statusText, setStatusText] = useState("")
-  const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY
+  const [faceApiLoaded, setFaceApiLoaded] = useState(false)
 
   const { isCameraActive, requestCamera, stopCamera, cameraStream } = useCamera()
   const { showNotification } = useNotification()
@@ -115,7 +108,38 @@ export function MoodDetection() {
     }
   }, [cameraStream])
 
-  // Gemini API ready — no model loading needed!
+  // ✅ face-api.js models load karo (CDN se, koi API key nahi chahiye)
+  useEffect(() => {
+    const loadFaceApi = async () => {
+      try {
+        // Dynamically load face-api.js from CDN
+        if (!(window as any).faceapi) {
+          await new Promise<void>((resolve, reject) => {
+            const script = document.createElement("script")
+            script.src = "https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"
+            script.onload = () => resolve()
+            script.onerror = () => reject(new Error("face-api.js load failed"))
+            document.head.appendChild(script)
+          })
+        }
+
+        const faceapi = (window as any).faceapi
+        const MODEL_URL = "https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model"
+
+        await Promise.all([
+          faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+          faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
+        ])
+
+        setFaceApiLoaded(true)
+        console.log("✅ face-api.js models loaded!")
+      } catch (err) {
+        console.error("face-api.js load error:", err)
+      }
+    }
+
+    loadFaceApi()
+  }, [])
 
   const startMoodAnalysis = async () => {
     const cameraGranted = await requestCamera("mood analysis and personalized recommendations")
@@ -132,17 +156,17 @@ export function MoodDetection() {
     setCameraMood(null)
     setAnalysisProgress(0)
     setShowRecommendations(false)
-    showNotification("info", "Analysis Started", "Analyzing your facial expressions with Gemini AI...")
+    showNotification("info", "Analysis Started", "Analyzing your facial expressions...")
 
     const progressInterval = setInterval(() => {
       setAnalysisProgress((prev) => {
         if (prev >= 85) { clearInterval(progressInterval); return 85 }
         return prev + 8
       })
-    }, 3000)
+    }, 200)
 
     try {
-      //Wait for camera to be ready
+      // Wait for camera to be ready
       let video = videoRef.current
       let attempts = 0
       while ((!video || !video.videoWidth || video.videoWidth === 0) && attempts < 20) {
@@ -152,84 +176,50 @@ export function MoodDetection() {
       }
       if (!video || !video.videoWidth) throw new Error("Video not ready")
 
-      setStatusText("Capturing snapshot...")
+      setStatusText("Detecting face...")
 
-      // Step 1: Video se snapshot lo (canvas use karke)
-      const canvas = document.createElement("canvas")
-      canvas.width = video.videoWidth || 640
-      canvas.height = video.videoHeight || 480
-      const ctx = canvas.getContext("2d")
-      if (!ctx) throw new Error("Canvas context unavailable")
-      ctx.drawImage(video, 0, 0)
+      // face-api.js se expression detect karo
+      const faceapi = (window as any).faceapi
 
-      // Base64 image banao
-      const base64Image = canvas.toDataURL("image/jpeg", 0.8).split(",")[1]
+      if (!faceapi || !faceApiLoaded) {
+        throw new Error("face-api.js not loaded yet, please try again")
+      }
 
-      setStatusText("Gemini AI analyzing your mood...")
+      const detections = await faceapi
+        .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+        .withFaceExpressions()
 
-      // Step 2: Gemini Vision API call
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{
-              parts: [
-                {
-                  inline_data: {
-                    mime_type: "image/jpeg",
-                    data: base64Image
-                  }
-                },
-                {
-                  text: `Analyze this person's facial expression, body language, posture, and overall vibe.
-Determine their current mood from EXACTLY ONE of these options: Happy, Sad, Excited, Calm, Tired, Angry, Romantic, Adventurous.
-
-Also give a confidence score from 0-100.
-
-Respond in this exact JSON format only, no extra text:
-{"mood": "Happy", "confidence": 82, "reason": "bright smile and relaxed posture"}`
-                }
-              ]
-            }],
-            generationConfig: { temperature: 0.2, maxOutputTokens: 100 }
-          })
-        }
-      )
-
-      const data = await response.json()
       clearInterval(progressInterval)
       setAnalysisProgress(100)
 
-      // Gemini response parse karo
-      const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || ""
-      const cleanText = rawText.replace(/```json|```/g, "").trim()
-      const parsed = JSON.parse(cleanText)
+      if (!detections) {
+        throw new Error("No face detected. Please look at the camera.")
+      }
 
-      const moodName = parsed.mood as string
-      const moodScore = Math.min(100, Math.max(0, parsed.confidence as number))
+      // Expressions object se best match nikalo
+      const expressions: Record<string, number> = detections.expressions
+      const topExpression = Object.entries(expressions).sort((a, b) => b[1] - a[1])[0]
+      const expressionName = topExpression[0] // e.g. "happy"
+      const expressionScore = Math.round(topExpression[1] * 100) // 0-100
 
-      // Valid mood check
-      const validMoods = ["Happy", "Sad", "Excited", "Calm", "Tired", "Angry", "Romantic", "Adventurous"]
-      const finalMood = validMoods.includes(moodName) ? moodName : "Calm"
+      // face-api expression → our mood
+      const moodName = expressionToMood[expressionName] || "Calm"
 
-      setCameraMood(finalMood)
-      setCameraConfidence(moodScore)
+      setCameraMood(moodName)
+      setCameraConfidence(expressionScore)
       setStatusText("")
       setStep("question")
       showNotification("info", "Almost there!", "One quick question to perfect your recommendations 🎯")
 
-    } catch (err) {
-      console.error("Gemini mood detection error:", err)
+    } catch (err: any) {
+      console.error("face-api mood detection error:", err)
       clearInterval(progressInterval)
-      showNotification("error", "Detection Failed", "Could not analyze mood. Check API key or try again.")
+      showNotification("error", "Detection Failed", err?.message || "Could not analyze mood. Try again.")
       setStep("idle")
       setStatusText("")
     }
   }
 
-  // Called when user picks their mood from the quick question
   const handleUserMoodSelect = (userMood: string) => {
     if (!cameraMood) return
 
@@ -301,7 +291,9 @@ Respond in this exact JSON format only, no extra text:
         <p className="text-slate-400 text-lg">
           Advanced facial expression analysis for personalized content recommendations
         </p>
-        <p className="text-green-400 text-sm mt-2">✅ Powered by Gemini AI — No setup needed</p>
+        <p className={`text-sm mt-2 ${faceApiLoaded ? "text-green-400" : "text-yellow-400"}`}>
+          {faceApiLoaded ? "✅ face-api.js Ready — No API key needed!" : "⏳ Loading face detection models..."}
+        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -317,7 +309,6 @@ Respond in this exact JSON format only, no extra text:
             <div className="aspect-video bg-slate-900 rounded-lg flex items-center justify-center relative overflow-hidden">
               {isCameraActive ? (
                 <div className="relative w-full h-full">
-                  {/* Real camera feed */}
                   <video
                     ref={videoRef}
                     autoPlay
@@ -338,7 +329,6 @@ Respond in this exact JSON format only, no extra text:
                       </div>
                     </div>
                   )}
-                  {/* Step: question — show scan complete overlay */}
                   {step === "question" && (
                     <div className="absolute inset-0 bg-green-500/20 flex flex-col items-center justify-center rounded-lg">
                       <CheckCircle className="h-12 w-12 text-green-400 mx-auto mb-3" />
@@ -348,7 +338,6 @@ Respond in this exact JSON format only, no extra text:
                       </p>
                     </div>
                   )}
-                  {/* Step: done — show final mood overlay */}
                   {step === "done" && (
                     <div className="absolute inset-0 bg-purple-500/20 flex flex-col items-center justify-center rounded-lg">
                       <CheckCircle className="h-12 w-12 text-purple-400 mx-auto mb-3" />
@@ -372,10 +361,9 @@ Respond in this exact JSON format only, no extra text:
           </CardContent>
         </Card>
 
-        {/* Right Panel — changes based on step */}
+        {/* Right Panel */}
         <Card className="bg-slate-800 border-slate-700">
           {step === "question" ? (
-            // ✅ STEP 2: Quick Question
             <>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -411,7 +399,6 @@ Respond in this exact JSON format only, no extra text:
               </CardContent>
             </>
           ) : (
-            // ✅ STEP 1 / DONE: Mood Results
             <>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -487,9 +474,9 @@ Respond in this exact JSON format only, no extra text:
       {/* Controls */}
       <div className="flex justify-center gap-4">
         {step === "idle" && !isCameraActive && (
-          <Button onClick={startMoodAnalysis} className="bg-orange-500 hover:bg-orange-600" size="lg">
+          <Button onClick={startMoodAnalysis} className="bg-orange-500 hover:bg-orange-600" size="lg" disabled={!faceApiLoaded}>
             <Camera className="mr-2 h-5 w-5" />
-            Start Mood Analysis
+            {faceApiLoaded ? "Start Mood Analysis" : "Loading models..."}
           </Button>
         )}
         {step === "idle" && isCameraActive && (
@@ -588,16 +575,6 @@ Respond in this exact JSON format only, no extra text:
     </div>
   )
 }
-
-
-
-
-
-
-
-
-
-
 
 
 
