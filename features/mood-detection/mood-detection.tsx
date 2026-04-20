@@ -90,7 +90,7 @@ export function MoodDetection() {
     const loadModels = async () => {
       try {
         const faceapi = await import("face-api.js")
-        const MODEL_URL = "/models"
+        const MODEL_URL = "/FireLoop/models"
         await Promise.all([
           faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
           faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
