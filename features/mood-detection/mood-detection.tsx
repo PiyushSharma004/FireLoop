@@ -139,7 +139,7 @@ export function MoodDetection() {
         if (prev >= 85) { clearInterval(progressInterval); return 85 }
         return prev + 8
       })
-    }, 200)
+    }, 3000)
 
     try {
       //Wait for camera to be ready
