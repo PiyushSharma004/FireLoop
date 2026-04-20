@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { Camera, Activity, RefreshCw, Zap, Heart, Brain, Star, Play, TrendingUp } from "lucide-react"
+import { Camera, Activity, RefreshCw, Zap, Heart, Brain, Star, Play, TrendingUp, MessageSquare, CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useCamera } from "@/components/camera-provider"
@@ -64,9 +64,40 @@ const expressionToMood: Record<string, string> = {
   fearful: "Adventurous",
 }
 
+// Quick question options shown after camera scan
+const quickMoodOptions = [
+  { label: "😊 Khush / Happy", value: "Happy" },
+  { label: "😢 Udaas / Sad", value: "Sad" },
+  { label: "🤩 Excited!", value: "Excited" },
+  { label: "😌 Shant / Calm", value: "Calm" },
+  { label: "😴 Thaka hua / Tired", value: "Tired" },
+  { label: "😠 Gussa / Angry", value: "Angry" },
+  { label: "😍 Romantic", value: "Romantic" },
+  { label: "🤠 Adventurous", value: "Adventurous" },
+]
+
+// Combine camera mood + user-selected mood
+// Camera scan gives us a base, user answer refines it
+// If user confirms camera mood → confidence boost
+// If user picks different mood → user answer wins (more accurate)
+function combineMoods(cameraMood: string, userMood: string, cameraConfidence: number): { mood: string; confidence: number } {
+  if (cameraMood === userMood) {
+    // Both agree — higher confidence
+    return { mood: userMood, confidence: Math.min(100, Math.round(cameraConfidence * 1.15)) }
+  } else {
+    // User answer overrides camera (user knows their mood better)
+    // Confidence is averaged: camera gave some signal, user confirmed differently
+    return { mood: userMood, confidence: Math.min(100, Math.round((cameraConfidence + 85) / 2)) }
+  }
+}
+
+type AnalysisStep = "idle" | "scanning" | "question" | "done"
+
 export function MoodDetection() {
-  const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [step, setStep] = useState<AnalysisStep>("idle")
   const [detectedMood, setDetectedMood] = useState<string | null>(null)
+  const [cameraMood, setCameraMood] = useState<string | null>(null)
+  const [cameraConfidence, setCameraConfidence] = useState(0)
   const [confidence, setConfidence] = useState(0)
   const [analysisProgress, setAnalysisProgress] = useState(0)
   const [moodHistory, setMoodHistory] = useState<Array<{ mood: string; time: string; confidence: number }>>([])
@@ -115,8 +146,9 @@ export function MoodDetection() {
       return
     }
 
-    setIsAnalyzing(true)
+    setStep("scanning")
     setDetectedMood(null)
+    setCameraMood(null)
     setAnalysisProgress(0)
     setShowRecommendations(false)
     showNotification("info", "Analysis Started", "Analyzing your facial expressions...")
@@ -145,7 +177,7 @@ export function MoodDetection() {
 
         if (!detection) {
           showNotification("error", "No Face Detected", "Please make sure your face is visible to the camera")
-          setIsAnalyzing(false)
+          setStep("idle")
           setStatusText("")
           return
         }
@@ -156,41 +188,67 @@ export function MoodDetection() {
         const expressionScore = Math.round(topExpression[1] * 100)
         const moodName = expressionToMood[expressionName] || "Calm"
 
-        setDetectedMood(moodName)
-        setConfidence(expressionScore)
-        setIsAnalyzing(false)
-        setShowRecommendations(true)
+        setCameraMood(moodName)
+        setCameraConfidence(expressionScore)
         setStatusText("")
 
-        const newEntry = { mood: moodName, time: new Date().toLocaleTimeString(), confidence: expressionScore }
-        setMoodHistory((prev) => [newEntry, ...prev.slice(0, 4)])
-
-        showNotification("success", "Mood Detected!", `You're feeling ${moodName.toLowerCase()} (${expressionScore}% confidence)`)
-
-        setTimeout(() => {
-          const recs = moodBasedContent[moodName as keyof typeof moodBasedContent] || []
-          showNotification("info", "Recommendations Ready", `Found ${recs.length} perfect matches for your mood!`)
-        }, 1500)
+        // Step 2: Show the quick question
+        setStep("question")
+        showNotification("info", "Almost there!", "One quick question to perfect your recommendations 🎯")
 
       } catch (err) {
         console.error("Face detection error:", err)
         showNotification("error", "Detection Failed", "Could not analyze face. Please try again.")
-        setIsAnalyzing(false)
+        setStep("idle")
         setStatusText("")
         clearInterval(progressInterval)
       }
     }, 2500)
   }
 
+  // Called when user picks their mood from the quick question
+  const handleUserMoodSelect = (userMood: string) => {
+    if (!cameraMood) return
+
+    const result = combineMoods(cameraMood, userMood, cameraConfidence)
+    setDetectedMood(result.mood)
+    setConfidence(result.confidence)
+    setStep("done")
+    setShowRecommendations(true)
+
+    const newEntry = { mood: result.mood, time: new Date().toLocaleTimeString(), confidence: result.confidence }
+    setMoodHistory((prev) => [newEntry, ...prev.slice(0, 4)])
+
+    showNotification("success", "Mood Detected!", `You're feeling ${result.mood.toLowerCase()} (${result.confidence}% confidence)`)
+
+    setTimeout(() => {
+      const recs = moodBasedContent[result.mood as keyof typeof moodBasedContent] || []
+      showNotification("info", "Recommendations Ready", `Found ${recs.length} perfect matches for your mood!`)
+    }, 1500)
+  }
+
   const stopAnalysis = () => {
-    setIsAnalyzing(false)
+    setStep("idle")
     stopCamera()
     setDetectedMood(null)
+    setCameraMood(null)
+    setCameraConfidence(0)
     setConfidence(0)
     setAnalysisProgress(0)
     setShowRecommendations(false)
     setStatusText("")
     showNotification("info", "Analysis Stopped", "Mood detection has been stopped")
+  }
+
+  const resetForNewScan = () => {
+    setStep("idle")
+    setDetectedMood(null)
+    setCameraMood(null)
+    setCameraConfidence(0)
+    setConfidence(0)
+    setAnalysisProgress(0)
+    setShowRecommendations(false)
+    setStatusText("")
   }
 
   const playContent = (content: any) => {
@@ -206,6 +264,7 @@ export function MoodDetection() {
 
   const currentMood = moods.find((m) => m.name === detectedMood)
   const recommendations = detectedMood ? (moodBasedContent[detectedMood as keyof typeof moodBasedContent] || []) : []
+  const isAnalyzing = step === "scanning"
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
@@ -240,7 +299,7 @@ export function MoodDetection() {
             <div className="aspect-video bg-slate-900 rounded-lg flex items-center justify-center relative overflow-hidden">
               {isCameraActive ? (
                 <div className="relative w-full h-full">
-                  {/* ✅ Real camera feed */}
+                  {/* Real camera feed */}
                   <video
                     ref={videoRef}
                     autoPlay
@@ -261,7 +320,24 @@ export function MoodDetection() {
                       </div>
                     </div>
                   )}
-                  {isCameraActive && !isAnalyzing && (
+                  {/* Step: question — show scan complete overlay */}
+                  {step === "question" && (
+                    <div className="absolute inset-0 bg-green-500/20 flex flex-col items-center justify-center rounded-lg">
+                      <CheckCircle className="h-12 w-12 text-green-400 mx-auto mb-3" />
+                      <p className="text-green-400 font-medium">Face Scanned ✓</p>
+                      <p className="text-sm text-slate-300 mt-1">
+                        Camera detected: {cameraMood} ({cameraConfidence}%)
+                      </p>
+                    </div>
+                  )}
+                  {/* Step: done — show final mood overlay */}
+                  {step === "done" && (
+                    <div className="absolute inset-0 bg-purple-500/20 flex flex-col items-center justify-center rounded-lg">
+                      <CheckCircle className="h-12 w-12 text-purple-400 mx-auto mb-3" />
+                      <p className="text-purple-400 font-medium">Mood Confirmed ✓</p>
+                    </div>
+                  )}
+                  {isCameraActive && step === "idle" && (
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                       <div className="w-32 h-40 border-2 border-green-400/70 rounded-lg animate-pulse" />
                     </div>
@@ -278,79 +354,148 @@ export function MoodDetection() {
           </CardContent>
         </Card>
 
-        {/* Mood Results */}
+        {/* Right Panel — changes based on step */}
         <Card className="bg-slate-800 border-slate-700">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Activity className="h-5 w-5" />
-              Detected Mood
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {detectedMood && currentMood ? (
-              <div className="text-center space-y-4">
-                <div className="text-8xl animate-bounce">{currentMood.emoji}</div>
-                <div>
-                  <h3 className="text-3xl font-bold text-white mb-2">{detectedMood}</h3>
-                  <p className="text-slate-400 mb-2">{currentMood.description}</p>
-                  <div className="flex items-center justify-center gap-2">
-                    <Zap className="h-4 w-4 text-yellow-400" />
-                    <span className="text-yellow-400 font-medium">Confidence: {confidence}%</span>
-                  </div>
-                </div>
-                <div className="w-full bg-slate-700 rounded-full h-3">
-                  <div className={`h-3 rounded-full ${currentMood.color} transition-all duration-1000`} style={{ width: `${confidence}%` }} />
-                </div>
-                <div className="grid grid-cols-2 gap-4 mt-6">
-                  <div className="text-center p-3 bg-slate-700 rounded-lg">
-                    <Heart className="h-6 w-6 text-red-400 mx-auto mb-1" />
-                    <p className="text-sm text-slate-400">Emotional State</p>
-                    <p className="font-medium text-white">{detectedMood}</p>
-                  </div>
-                  <div className="text-center p-3 bg-slate-700 rounded-lg">
-                    <TrendingUp className="h-6 w-6 text-green-400 mx-auto mb-1" />
-                    <p className="text-sm text-slate-400">Recommendations</p>
-                    <p className="font-medium text-white">{recommendations.length} found</p>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <Activity className="h-16 w-16 text-slate-600 mx-auto mb-4" />
-                <p className="text-slate-400 text-lg">
-                  {isAnalyzing ? "Analyzing your mood..." : "Start analysis to detect your mood"}
+          {step === "question" ? (
+            // ✅ STEP 2: Quick Question
+            <>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5 text-orange-400" />
+                  <span>One Quick Question</span>
+                  <span className="text-xs bg-orange-500/20 text-orange-400 px-2 py-1 rounded-full ml-auto">Step 2/2</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-slate-300 mb-1 text-sm">
+                  Camera says you look <span className="text-yellow-400 font-semibold">{cameraMood}</span>.
+                  But you know yourself best — aap actually kaisa feel kar rahe ho?
                 </p>
-                {isAnalyzing && (
-                  <div className="mt-4 flex justify-center space-x-1">
-                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
-                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
-                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
+                <p className="text-slate-400 text-xs mb-4">Your answer will fine-tune the recommendations 🎯</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {quickMoodOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => handleUserMoodSelect(option.value)}
+                      className={`p-3 rounded-lg text-sm font-medium transition-all border-2 text-left
+                        ${option.value === cameraMood
+                          ? "border-yellow-500 bg-yellow-500/10 text-yellow-300"
+                          : "border-slate-600 bg-slate-700 text-slate-200 hover:border-purple-500 hover:bg-purple-500/10"
+                        }`}
+                    >
+                      {option.label}
+                      {option.value === cameraMood && (
+                        <span className="block text-xs text-yellow-400/70 mt-0.5">Camera detected</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </CardContent>
+            </>
+          ) : (
+            // ✅ STEP 1 / DONE: Mood Results
+            <>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Activity className="h-5 w-5" />
+                  Detected Mood
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {detectedMood && currentMood ? (
+                  <div className="text-center space-y-4">
+                    <div className="text-8xl animate-bounce">{currentMood.emoji}</div>
+                    <div>
+                      <h3 className="text-3xl font-bold text-white mb-2">{detectedMood}</h3>
+                      <p className="text-slate-400 mb-2">{currentMood.description}</p>
+                      <div className="flex items-center justify-center gap-2">
+                        <Zap className="h-4 w-4 text-yellow-400" />
+                        <span className="text-yellow-400 font-medium">Confidence: {confidence}%</span>
+                      </div>
+                    </div>
+                    <div className="w-full bg-slate-700 rounded-full h-3">
+                      <div className={`h-3 rounded-full ${currentMood.color} transition-all duration-1000`} style={{ width: `${confidence}%` }} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 mt-6">
+                      <div className="text-center p-3 bg-slate-700 rounded-lg">
+                        <Heart className="h-6 w-6 text-red-400 mx-auto mb-1" />
+                        <p className="text-sm text-slate-400">Emotional State</p>
+                        <p className="font-medium text-white">{detectedMood}</p>
+                      </div>
+                      <div className="text-center p-3 bg-slate-700 rounded-lg">
+                        <TrendingUp className="h-6 w-6 text-green-400 mx-auto mb-1" />
+                        <p className="text-sm text-slate-400">Recommendations</p>
+                        <p className="font-medium text-white">{recommendations.length} found</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Activity className="h-16 w-16 text-slate-600 mx-auto mb-4" />
+                    <p className="text-slate-400 text-lg">
+                      {isAnalyzing ? "Analyzing your mood..." : "Start analysis to detect your mood"}
+                    </p>
+                    {isAnalyzing && (
+                      <div className="mt-4 flex justify-center space-x-1">
+                        <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
+                        <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
+                        <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
+                      </div>
+                    )}
+                    {!isAnalyzing && step === "idle" && (
+                      <div className="mt-6 flex flex-col items-center gap-2 text-slate-500 text-sm">
+                        <div className="flex items-center gap-2">
+                          <span className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-xs">1</span>
+                          <span>Camera scans your face</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-xs">2</span>
+                          <span>Quick mood confirmation</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-xs">3</span>
+                          <span>Personalized recommendations!</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
-              </div>
-            )}
-          </CardContent>
+              </CardContent>
+            </>
+          )}
         </Card>
       </div>
 
       {/* Controls */}
       <div className="flex justify-center gap-4">
-        {!isCameraActive ? (
-          <Button onClick={startMoodAnalysis} className="bg-orange-500 hover:bg-orange-600" size="lg" disabled={isAnalyzing || !modelsLoaded}>
+        {step === "idle" && !isCameraActive && (
+          <Button onClick={startMoodAnalysis} className="bg-orange-500 hover:bg-orange-600" size="lg" disabled={!modelsLoaded}>
             <Camera className="mr-2 h-5 w-5" />
             {modelsLoaded ? "Start Mood Analysis" : "Loading AI..."}
           </Button>
-        ) : (
+        )}
+        {step === "idle" && isCameraActive && (
           <div className="flex gap-4">
-            {!isAnalyzing && (
-              <Button onClick={startMoodAnalysis} className="bg-blue-500 hover:bg-blue-600" size="lg" disabled={!modelsLoaded}>
-                <RefreshCw className="mr-2 h-5 w-5" />
-                Analyze Again
-              </Button>
-            )}
-            <Button onClick={stopAnalysis} variant="outline" size="lg">
-              Stop Analysis
+            <Button onClick={startMoodAnalysis} className="bg-blue-500 hover:bg-blue-600" size="lg" disabled={!modelsLoaded}>
+              <RefreshCw className="mr-2 h-5 w-5" />
+              Analyze Again
             </Button>
+            <Button onClick={stopAnalysis} variant="outline" size="lg">Stop Analysis</Button>
+          </div>
+        )}
+        {step === "scanning" && (
+          <Button onClick={stopAnalysis} variant="outline" size="lg">Cancel</Button>
+        )}
+        {step === "question" && (
+          <Button onClick={stopAnalysis} variant="outline" size="lg">Cancel</Button>
+        )}
+        {step === "done" && (
+          <div className="flex gap-4">
+            <Button onClick={resetForNewScan} className="bg-blue-500 hover:bg-blue-600" size="lg">
+              <RefreshCw className="mr-2 h-5 w-5" />
+              Scan Again
+            </Button>
+            <Button onClick={stopAnalysis} variant="outline" size="lg">Stop</Button>
           </div>
         )}
       </div>
@@ -425,6 +570,7 @@ export function MoodDetection() {
     </div>
   )
 }
+
 
 
 
