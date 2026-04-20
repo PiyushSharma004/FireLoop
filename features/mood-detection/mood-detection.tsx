@@ -5,239 +5,63 @@ import { useState, useEffect, useRef } from "react"
 import { Camera, Activity, RefreshCw, Zap, Heart, Brain, Star, Play, TrendingUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
 import { useCamera } from "@/components/camera-provider"
 import { useNotification } from "@/components/notification-provider"
 
 const moods = [
-  { name: "Happy", color: "bg-yellow-500", emoji: "😊", description: "Feeling joyful and content" },
-  { name: "Sad", color: "bg-blue-500", emoji: "😢", description: "Feeling down or melancholy" },
-  { name: "Excited", color: "bg-red-500", emoji: "🤩", description: "Full of energy and enthusiasm" },
-  { name: "Calm", color: "bg-green-500", emoji: "😌", description: "Peaceful and relaxed" },
-  { name: "Tired", color: "bg-purple-500", emoji: "😴", description: "Feeling sleepy or exhausted" },
-  { name: "Bored", color: "bg-gray-500", emoji: "😑", description: "Looking for something interesting" },
-  { name: "Romantic", color: "bg-pink-500", emoji: "😍", description: "In the mood for love stories" },
-  { name: "Adventurous", color: "bg-orange-500", emoji: "🤠", description: "Ready for action and thrills" },
+  { name: "Happy", color: "bg-yellow-500", emoji: "😊", description: "Feeling joyful and content", faceapi: "happy" },
+  { name: "Sad", color: "bg-blue-500", emoji: "😢", description: "Feeling down or melancholy", faceapi: "sad" },
+  { name: "Excited", color: "bg-red-500", emoji: "🤩", description: "Full of energy and enthusiasm", faceapi: "surprised" },
+  { name: "Calm", color: "bg-green-500", emoji: "😌", description: "Peaceful and relaxed", faceapi: "neutral" },
+  { name: "Tired", color: "bg-purple-500", emoji: "😴", description: "Feeling sleepy or exhausted", faceapi: "disgusted" },
+  { name: "Angry", color: "bg-orange-500", emoji: "😠", description: "Feeling frustrated or angry", faceapi: "angry" },
+  { name: "Romantic", color: "bg-pink-500", emoji: "😍", description: "In the mood for love stories", faceapi: "happy" },
+  { name: "Adventurous", color: "bg-orange-500", emoji: "🤠", description: "Ready for action and thrills", faceapi: "surprised" },
 ]
 
-// TMDB-inspired movie data with mood-based recommendations
 const moodBasedContent = {
   Happy: [
-    {
-      id: 1,
-      title: "Ted Lasso",
-      image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=300&h=450&fit=crop",
-      rating: 8.9,
-      year: 2020,
-      genre: "Comedy",
-      description: "An American football coach moves to England to manage a British soccer team.",
-      tmdb_id: 97546,
-    },
-    {
-      id: 2,
-      title: "The Good Place",
-      image: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=300&h=450&fit=crop",
-      rating: 8.2,
-      year: 2016,
-      genre: "Comedy",
-      description: "A woman finds herself in the afterlife and must learn to be a better person.",
-      tmdb_id: 66573,
-    },
-    {
-      id: 3,
-      title: "Parks and Recreation",
-      image: "https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?w=300&h=450&fit=crop",
-      rating: 8.6,
-      year: 2009,
-      genre: "Comedy",
-      description: "A mockumentary about local government in the fictional town of Pawnee, Indiana.",
-      tmdb_id: 8592,
-    },
-    {
-      id: 4,
-      title: "Brooklyn Nine-Nine",
-      image: "https://images.unsplash.com/photo-1489599735734-79b4212bdd26?w=300&h=450&fit=crop",
-      rating: 8.4,
-      year: 2013,
-      genre: "Comedy",
-      description: "Comedy series following the exploits of a talented detective in a New York precinct.",
-      tmdb_id: 48891,
-    },
+    { id: 1, title: "Ted Lasso", image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=300&h=450&fit=crop", rating: 8.9, year: 2020, genre: "Comedy", description: "An American football coach moves to England to manage a British soccer team.", tmdb_id: 97546 },
+    { id: 2, title: "The Good Place", image: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=300&h=450&fit=crop", rating: 8.2, year: 2016, genre: "Comedy", description: "A woman finds herself in the afterlife and must learn to be a better person.", tmdb_id: 66573 },
+    { id: 3, title: "Parks and Recreation", image: "https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?w=300&h=450&fit=crop", rating: 8.6, year: 2009, genre: "Comedy", description: "A mockumentary about local government in the fictional town of Pawnee, Indiana.", tmdb_id: 8592 },
   ],
   Sad: [
-    {
-      id: 5,
-      title: "This Is Us",
-      image: "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=300&h=450&fit=crop",
-      rating: 8.7,
-      year: 2016,
-      genre: "Drama",
-      description: "A heartwarming and emotional story about a unique set of triplets.",
-      tmdb_id: 67136,
-    },
-    {
-      id: 6,
-      title: "The Notebook",
-      image: "https://images.unsplash.com/photo-1489599735734-79b4212bdd26?w=300&h=450&fit=crop",
-      rating: 7.8,
-      year: 2004,
-      genre: "Romance",
-      description: "A poor yet passionate young man falls in love with a rich young woman.",
-      tmdb_id: 11036,
-    },
-    {
-      id: 7,
-      title: "Inside Out",
-      image: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=300&h=450&fit=crop",
-      rating: 8.1,
-      year: 2015,
-      genre: "Animation",
-      description: "After young Riley is uprooted from her Midwest life, her emotions conflict.",
-      tmdb_id: 150540,
-    },
+    { id: 5, title: "This Is Us", image: "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=300&h=450&fit=crop", rating: 8.7, year: 2016, genre: "Drama", description: "A heartwarming and emotional story about a unique set of triplets.", tmdb_id: 67136 },
+    { id: 7, title: "Inside Out", image: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=300&h=450&fit=crop", rating: 8.1, year: 2015, genre: "Animation", description: "After young Riley is uprooted from her Midwest life, her emotions conflict.", tmdb_id: 150540 },
   ],
   Excited: [
-    {
-      id: 8,
-      title: "Avengers: Endgame",
-      image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=450&fit=crop",
-      rating: 8.4,
-      year: 2019,
-      genre: "Action",
-      description: "The Avengers assemble once more to reverse Thanos' actions.",
-      tmdb_id: 299534,
-    },
-    {
-      id: 9,
-      title: "Fast & Furious",
-      image: "https://images.unsplash.com/photo-1509248961158-e54f6934749c?w=300&h=450&fit=crop",
-      rating: 7.2,
-      year: 2001,
-      genre: "Action",
-      description: "Los Angeles police officer goes undercover in the racing world.",
-      tmdb_id: 9799,
-    },
-    {
-      id: 10,
-      title: "John Wick",
-      image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=300&h=450&fit=crop",
-      rating: 7.4,
-      year: 2014,
-      genre: "Action",
-      description: "An ex-hitman comes out of retirement to track down the gangsters.",
-      tmdb_id: 245891,
-    },
+    { id: 8, title: "Avengers: Endgame", image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=450&fit=crop", rating: 8.4, year: 2019, genre: "Action", description: "The Avengers assemble once more to reverse Thanos' actions.", tmdb_id: 299534 },
+    { id: 9, title: "Fast & Furious", image: "https://images.unsplash.com/photo-1509248961158-e54f6934749c?w=300&h=450&fit=crop", rating: 7.2, year: 2001, genre: "Action", description: "Los Angeles police officer goes undercover in the racing world.", tmdb_id: 9799 },
   ],
   Calm: [
-    {
-      id: 11,
-      title: "Studio Ghibli Collection",
-      image: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=300&h=450&fit=crop",
-      rating: 8.6,
-      year: 1988,
-      genre: "Animation",
-      description: "Beautiful animated films that soothe the soul.",
-      tmdb_id: 129,
-    },
-    {
-      id: 12,
-      title: "The Great British Bake Off",
-      image: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=300&h=450&fit=crop",
-      rating: 8.5,
-      year: 2010,
-      genre: "Reality",
-      description: "Amateur bakers compete in a series of rounds.",
-      tmdb_id: 42009,
-    },
+    { id: 11, title: "Studio Ghibli Collection", image: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=300&h=450&fit=crop", rating: 8.6, year: 1988, genre: "Animation", description: "Beautiful animated films that soothe the soul.", tmdb_id: 129 },
+    { id: 12, title: "The Great British Bake Off", image: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=300&h=450&fit=crop", rating: 8.5, year: 2010, genre: "Reality", description: "Amateur bakers compete in a series of rounds.", tmdb_id: 42009 },
   ],
   Tired: [
-    {
-      id: 13,
-      title: "Planet Earth",
-      image: "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=300&h=450&fit=crop",
-      rating: 9.4,
-      year: 2006,
-      genre: "Documentary",
-      description: "A nature documentary series featuring the wild places of our planet.",
-      tmdb_id: 1044,
-    },
-    {
-      id: 14,
-      title: "Meditation & Sleep Stories",
-      image: "https://images.unsplash.com/photo-1489599735734-79b4212bdd26?w=300&h=450&fit=crop",
-      rating: 8.0,
-      year: 2020,
-      genre: "Wellness",
-      description: "Calming content to help you relax and unwind.",
-      tmdb_id: 0,
-    },
+    { id: 13, title: "Planet Earth", image: "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=300&h=450&fit=crop", rating: 9.4, year: 2006, genre: "Documentary", description: "A nature documentary series featuring the wild places of our planet.", tmdb_id: 1044 },
+  ],
+  Angry: [
+    { id: 10, title: "John Wick", image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=300&h=450&fit=crop", rating: 7.4, year: 2014, genre: "Action", description: "An ex-hitman comes out of retirement to track down the gangsters.", tmdb_id: 245891 },
   ],
   Romantic: [
-    {
-      id: 15,
-      title: "Bridgerton",
-      image: "https://images.unsplash.com/photo-1489599735734-79b4212bdd26?w=300&h=450&fit=crop",
-      rating: 7.3,
-      year: 2020,
-      genre: "Romance",
-      description: "The romantic lives of the Bridgerton family in Regency-era England.",
-      tmdb_id: 87108,
-    },
-    {
-      id: 16,
-      title: "Pride and Prejudice",
-      image: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=300&h=450&fit=crop",
-      rating: 8.7,
-      year: 2005,
-      genre: "Romance",
-      description: "Sparks fly when spirited Elizabeth Bennet meets Mr. Darcy.",
-      tmdb_id: 1403,
-    },
+    { id: 15, title: "Bridgerton", image: "https://images.unsplash.com/photo-1489599735734-79b4212bdd26?w=300&h=450&fit=crop", rating: 7.3, year: 2020, genre: "Romance", description: "The romantic lives of the Bridgerton family in Regency-era England.", tmdb_id: 87108 },
+    { id: 16, title: "Pride and Prejudice", image: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=300&h=450&fit=crop", rating: 8.7, year: 2005, genre: "Romance", description: "Sparks fly when spirited Elizabeth Bennet meets Mr. Darcy.", tmdb_id: 1403 },
   ],
   Adventurous: [
-    {
-      id: 17,
-      title: "Indiana Jones",
-      image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=450&fit=crop",
-      rating: 8.5,
-      year: 1981,
-      genre: "Adventure",
-      description: "Archaeologist and adventurer Indiana Jones races to find artifacts.",
-      tmdb_id: 85,
-    },
-    {
-      id: 18,
-      title: "The Lord of the Rings",
-      image: "https://images.unsplash.com/photo-1509248961158-e54f6934749c?w=300&h=450&fit=crop",
-      rating: 8.8,
-      year: 2001,
-      genre: "Fantasy",
-      description: "A meek Hobbit and companions set out to destroy an ancient ring.",
-      tmdb_id: 120,
-    },
+    { id: 17, title: "Indiana Jones", image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=450&fit=crop", rating: 8.5, year: 1981, genre: "Adventure", description: "Archaeologist and adventurer Indiana Jones races to find artifacts.", tmdb_id: 85 },
+    { id: 18, title: "The Lord of the Rings", image: "https://images.unsplash.com/photo-1509248961158-e54f6934749c?w=300&h=450&fit=crop", rating: 8.8, year: 2001, genre: "Fantasy", description: "A meek Hobbit and companions set out to destroy an ancient ring.", tmdb_id: 120 },
   ],
-  Bored: [
-    {
-      id: 19,
-      title: "Stranger Things",
-      image: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=300&h=450&fit=crop",
-      rating: 8.7,
-      year: 2016,
-      genre: "Sci-Fi",
-      description: "When a young boy vanishes, a small town uncovers supernatural mysteries.",
-      tmdb_id: 66732,
-    },
-    {
-      id: 20,
-      title: "The Office",
-      image: "https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?w=300&h=450&fit=crop",
-      rating: 8.9,
-      year: 2005,
-      genre: "Comedy",
-      description: "A mockumentary on a group of typical office workers.",
-      tmdb_id: 2316,
-    },
-  ],
+}
+
+// face-api expression → our mood mapping
+const expressionToMood: Record<string, string> = {
+  happy: "Happy",
+  sad: "Sad",
+  surprised: "Excited",
+  neutral: "Calm",
+  disgusted: "Tired",
+  angry: "Angry",
+  fearful: "Adventurous",
 }
 
 export function MoodDetection() {
@@ -247,23 +71,47 @@ export function MoodDetection() {
   const [analysisProgress, setAnalysisProgress] = useState(0)
   const [moodHistory, setMoodHistory] = useState<Array<{ mood: string; time: string; confidence: number }>>([])
   const [showRecommendations, setShowRecommendations] = useState(false)
+  const [modelsLoaded, setModelsLoaded] = useState(false)
+  const [statusText, setStatusText] = useState("")
+
   const { isCameraActive, requestCamera, stopCamera, cameraStream } = useCamera()
   const { showNotification } = useNotification()
-
-  // ✅ VIDEO REF — real camera feed ke liye
   const videoRef = useRef<HTMLVideoElement>(null)
 
-  // ✅ Jab bhi cameraStream aaye, video element mein set karo
+  // ✅ Camera stream video mein set karo
   useEffect(() => {
     if (videoRef.current && cameraStream) {
       videoRef.current.srcObject = cameraStream
     }
   }, [cameraStream])
 
+  // ✅ face-api models load karo
+  useEffect(() => {
+    const loadModels = async () => {
+      try {
+        const faceapi = await import("face-api.js")
+        const MODEL_URL = "/models"
+        await Promise.all([
+          faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+          faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
+        ])
+        setModelsLoaded(true)
+      } catch (err) {
+        console.error("Models load error:", err)
+      }
+    }
+    loadModels()
+  }, [])
+
   const startMoodAnalysis = async () => {
     const cameraGranted = await requestCamera("mood analysis and personalized recommendations")
     if (!cameraGranted) {
       showNotification("error", "Camera Access Denied", "Please allow camera access for mood detection")
+      return
+    }
+
+    if (!modelsLoaded) {
+      showNotification("error", "Models Loading", "Please wait, AI models are still loading...")
       return
     }
 
@@ -273,50 +121,65 @@ export function MoodDetection() {
     setShowRecommendations(false)
     showNotification("info", "Analysis Started", "Analyzing your facial expressions...")
 
-    // Simulate progressive analysis
     const progressInterval = setInterval(() => {
       setAnalysisProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(progressInterval)
-          return 100
-        }
+        if (prev >= 90) { clearInterval(progressInterval); return 90 }
         return prev + 10
       })
     }, 200)
 
-    // Simulate AI mood detection with realistic timing
-    setTimeout(() => {
-      const randomMood = moods[Math.floor(Math.random() * moods.length)]
-      const newConfidence = Math.floor(Math.random() * 25) + 75 // 75-100% confidence
+    setTimeout(async () => {
+      try {
+        const faceapi = await import("face-api.js")
+        const video = videoRef.current
+        if (!video) throw new Error("Video not ready")
 
-      setDetectedMood(randomMood.name)
-      setConfidence(newConfidence)
-      setIsAnalyzing(false)
-      setShowRecommendations(true)
+        setStatusText("Scanning your face...")
 
-      // Add to history
-      const newEntry = {
-        mood: randomMood.name,
-        time: new Date().toLocaleTimeString(),
-        confidence: newConfidence,
+        const detection = await faceapi
+          .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+          .withFaceExpressions()
+
+        clearInterval(progressInterval)
+        setAnalysisProgress(100)
+
+        if (!detection) {
+          showNotification("error", "No Face Detected", "Please make sure your face is visible to the camera")
+          setIsAnalyzing(false)
+          setStatusText("")
+          return
+        }
+
+        const expressions = detection.expressions
+        const topExpression = Object.entries(expressions).reduce((a, b) => a[1] > b[1] ? a : b)
+        const expressionName = topExpression[0]
+        const expressionScore = Math.round(topExpression[1] * 100)
+        const moodName = expressionToMood[expressionName] || "Calm"
+
+        setDetectedMood(moodName)
+        setConfidence(expressionScore)
+        setIsAnalyzing(false)
+        setShowRecommendations(true)
+        setStatusText("")
+
+        const newEntry = { mood: moodName, time: new Date().toLocaleTimeString(), confidence: expressionScore }
+        setMoodHistory((prev) => [newEntry, ...prev.slice(0, 4)])
+
+        showNotification("success", "Mood Detected!", `You're feeling ${moodName.toLowerCase()} (${expressionScore}% confidence)`)
+
+        setTimeout(() => {
+          const recs = moodBasedContent[moodName as keyof typeof moodBasedContent] || []
+          showNotification("info", "Recommendations Ready", `Found ${recs.length} perfect matches for your mood!`)
+        }, 1500)
+
+      } catch (err) {
+        console.error("Face detection error:", err)
+        showNotification("error", "Detection Failed", "Could not analyze face. Please try again.")
+        setIsAnalyzing(false)
+        setStatusText("")
+        clearInterval(progressInterval)
       }
-      setMoodHistory((prev) => [newEntry, ...prev.slice(0, 4)]) // Keep last 5 entries
-
-      showNotification(
-        "success",
-        "Mood Detected!",
-        `You're feeling ${randomMood.name.toLowerCase()} (${newConfidence}% confidence)`,
-      )
-
-      // Show recommendations after a brief delay
-      setTimeout(() => {
-        showNotification(
-          "info",
-          "Recommendations Ready",
-          `Found ${getRecommendations().length} perfect matches for your mood!`,
-        )
-      }, 1500)
-    }, 3000)
+    }, 2500)
   }
 
   const stopAnalysis = () => {
@@ -326,12 +189,8 @@ export function MoodDetection() {
     setConfidence(0)
     setAnalysisProgress(0)
     setShowRecommendations(false)
+    setStatusText("")
     showNotification("info", "Analysis Stopped", "Mood detection has been stopped")
-  }
-
-  const getRecommendations = () => {
-    if (!detectedMood) return []
-    return moodBasedContent[detectedMood as keyof typeof moodBasedContent] || []
   }
 
   const playContent = (content: any) => {
@@ -346,7 +205,7 @@ export function MoodDetection() {
   }
 
   const currentMood = moods.find((m) => m.name === detectedMood)
-  const recommendations = getRecommendations()
+  const recommendations = detectedMood ? (moodBasedContent[detectedMood as keyof typeof moodBasedContent] || []) : []
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
@@ -360,6 +219,12 @@ export function MoodDetection() {
         <p className="text-slate-400 text-lg">
           Advanced facial expression analysis for personalized content recommendations
         </p>
+        {!modelsLoaded && (
+          <p className="text-yellow-400 text-sm mt-2 animate-pulse">⏳ Loading AI models...</p>
+        )}
+        {modelsLoaded && (
+          <p className="text-green-400 text-sm mt-2">✅ AI models ready</p>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -375,8 +240,7 @@ export function MoodDetection() {
             <div className="aspect-video bg-slate-900 rounded-lg flex items-center justify-center relative overflow-hidden">
               {isCameraActive ? (
                 <div className="relative w-full h-full">
-
-                  {/* ✅ REAL CAMERA FEED */}
+                  {/* ✅ Real camera feed */}
                   <video
                     ref={videoRef}
                     autoPlay
@@ -384,23 +248,19 @@ export function MoodDetection() {
                     muted
                     className="w-full h-full object-cover rounded-lg"
                   />
-
-                  {/* Analyzing overlay */}
                   {isAnalyzing && (
                     <div className="absolute inset-0 bg-blue-500/20 flex flex-col items-center justify-center rounded-lg">
-                      <div className="text-center mb-4">
-                        <RefreshCw className="h-12 w-12 animate-spin text-blue-400 mx-auto mb-3" />
-                        <p className="text-blue-400 font-medium">Analyzing expressions...</p>
-                        <p className="text-sm text-slate-300">Please look at the camera</p>
-                      </div>
-                      <div className="w-48">
-                        <Progress value={analysisProgress} className="h-2" />
+                      <RefreshCw className="h-12 w-12 animate-spin text-blue-400 mx-auto mb-3" />
+                      <p className="text-blue-400 font-medium">{statusText || "Analyzing expressions..."}</p>
+                      <p className="text-sm text-slate-300 mt-1">Please look at the camera</p>
+                      <div className="w-48 mt-4">
+                        <div className="w-full bg-slate-700 rounded-full h-2">
+                          <div className="h-2 rounded-full bg-blue-400 transition-all duration-300" style={{ width: `${analysisProgress}%` }} />
+                        </div>
                         <p className="text-xs text-center text-slate-300 mt-2">{analysisProgress}% complete</p>
                       </div>
                     </div>
                   )}
-
-                  {/* Face detection box overlay */}
                   {isCameraActive && !isAnalyzing && (
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                       <div className="w-32 h-40 border-2 border-green-400/70 rounded-lg animate-pulse" />
@@ -439,10 +299,7 @@ export function MoodDetection() {
                   </div>
                 </div>
                 <div className="w-full bg-slate-700 rounded-full h-3">
-                  <div
-                    className={`h-3 rounded-full ${currentMood.color} transition-all duration-1000`}
-                    style={{ width: `${confidence}%` }}
-                  />
+                  <div className={`h-3 rounded-full ${currentMood.color} transition-all duration-1000`} style={{ width: `${confidence}%` }} />
                 </div>
                 <div className="grid grid-cols-2 gap-4 mt-6">
                   <div className="text-center p-3 bg-slate-700 rounded-lg">
@@ -464,12 +321,10 @@ export function MoodDetection() {
                   {isAnalyzing ? "Analyzing your mood..." : "Start analysis to detect your mood"}
                 </p>
                 {isAnalyzing && (
-                  <div className="mt-4">
-                    <div className="flex justify-center space-x-1">
-                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
-                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
-                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
-                    </div>
+                  <div className="mt-4 flex justify-center space-x-1">
+                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
+                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
+                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
                   </div>
                 )}
               </div>
@@ -481,23 +336,18 @@ export function MoodDetection() {
       {/* Controls */}
       <div className="flex justify-center gap-4">
         {!isCameraActive ? (
-          <Button
-            onClick={startMoodAnalysis}
-            className="bg-orange-500 hover:bg-orange-600"
-            size="lg"
-            disabled={isAnalyzing}
-          >
+          <Button onClick={startMoodAnalysis} className="bg-orange-500 hover:bg-orange-600" size="lg" disabled={isAnalyzing || !modelsLoaded}>
             <Camera className="mr-2 h-5 w-5" />
-            Start Mood Analysis
+            {modelsLoaded ? "Start Mood Analysis" : "Loading AI..."}
           </Button>
         ) : (
           <div className="flex gap-4">
-            {!isAnalyzing ? (
-              <Button onClick={startMoodAnalysis} className="bg-blue-500 hover:bg-blue-600" size="lg">
+            {!isAnalyzing && (
+              <Button onClick={startMoodAnalysis} className="bg-blue-500 hover:bg-blue-600" size="lg" disabled={!modelsLoaded}>
                 <RefreshCw className="mr-2 h-5 w-5" />
                 Analyze Again
               </Button>
-            ) : null}
+            )}
             <Button onClick={stopAnalysis} variant="outline" size="lg">
               Stop Analysis
             </Button>
@@ -508,9 +358,7 @@ export function MoodDetection() {
       {/* Mood History */}
       {moodHistory.length > 0 && (
         <Card className="bg-slate-800 border-slate-700">
-          <CardHeader>
-            <CardTitle>Recent Mood History</CardTitle>
-          </CardHeader>
+          <CardHeader><CardTitle>Recent Mood History</CardTitle></CardHeader>
           <CardContent>
             <div className="space-y-3">
               {moodHistory.map((entry, index) => {
@@ -536,60 +384,37 @@ export function MoodDetection() {
         </Card>
       )}
 
-      {/* Mood-based Recommendations */}
+      {/* Recommendations */}
       {showRecommendations && detectedMood && recommendations.length > 0 && (
         <Card className="bg-slate-800 border-slate-700">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Heart className="h-5 w-5 text-red-400" />
               Perfect for Your {detectedMood} Mood
-              <span className="text-sm bg-orange-500/20 text-orange-400 px-2 py-1 rounded-full ml-2">
-                {recommendations.length} matches
-              </span>
+              <span className="text-sm bg-orange-500/20 text-orange-400 px-2 py-1 rounded-full ml-2">{recommendations.length} matches</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {recommendations.map((content) => (
-                <div
-                  key={content.id}
-                  className="bg-slate-700 rounded-lg overflow-hidden hover:scale-105 transition-transform cursor-pointer group"
-                >
+                <div key={content.id} className="bg-slate-700 rounded-lg overflow-hidden hover:scale-105 transition-transform cursor-pointer group">
                   <div className="relative aspect-[3/4]">
-                    <img
-                      src={content.image || "/placeholder.svg"}
-                      alt={content.title}
-                      className="w-full h-full object-cover"
-                    />
+                    <img src={content.image || "/placeholder.svg"} alt={content.title} className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          className="bg-orange-500 hover:bg-orange-600"
-                          onClick={() => playContent(content)}
-                        >
-                          <Play className="h-4 w-4" />
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={() => addToWatchlist(content)}>
-                          <Heart className="h-4 w-4" />
-                        </Button>
+                        <Button size="sm" className="bg-orange-500 hover:bg-orange-600" onClick={() => playContent(content)}><Play className="h-4 w-4" /></Button>
+                        <Button size="sm" variant="outline" onClick={() => addToWatchlist(content)}><Heart className="h-4 w-4" /></Button>
                       </div>
                     </div>
                     <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
-                      <Star className="h-3 w-3 text-yellow-400" />
-                      {content.rating}
+                      <Star className="h-3 w-3 text-yellow-400" />{content.rating}
                     </div>
-                    <div className="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
-                      {Math.floor(confidence)}% Match
-                    </div>
+                    <div className="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded">{Math.floor(confidence)}% Match</div>
                   </div>
                   <div className="p-3">
                     <h3 className="font-medium text-white mb-1">{content.title}</h3>
-                    <p className="text-sm text-slate-400 mb-2">
-                      {content.genre} • {content.year}
-                    </p>
+                    <p className="text-sm text-slate-400 mb-2">{content.genre} • {content.year}</p>
                     <p className="text-xs text-slate-500 line-clamp-2">{content.description}</p>
-                    <div className="mt-2 text-xs text-slate-600">TMDB ID: {content.tmdb_id}</div>
                   </div>
                 </div>
               ))}
@@ -600,6 +425,21 @@ export function MoodDetection() {
     </div>
   )
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
