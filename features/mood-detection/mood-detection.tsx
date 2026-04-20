@@ -102,7 +102,7 @@ export function MoodDetection() {
   const [moodHistory, setMoodHistory] = useState<Array<{ mood: string; time: string; confidence: number }>>([])
   const [showRecommendations, setShowRecommendations] = useState(false)
   const [statusText, setStatusText] = useState("")
-  const GEMINI_API_KEY = "AIzaSyDIN6FWk3Wkikqz1tZR672PJVqfxWDik_g"
+  const GEMINI_API_KEY = "AIzaSyCCGrdNCN_TR6JI7fUUYvN9Uj8-7dZ2w7Y"
 
   const { isCameraActive, requestCamera, stopCamera, cameraStream } = useCamera()
   const { showNotification } = useNotification()
