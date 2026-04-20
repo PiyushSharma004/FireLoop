@@ -141,7 +141,7 @@ export function MoodDetection() {
     try {
       const video = videoRef.current
 if (!video || !video.videoWidth) {
-  await new Promise(resolve => setTimeout(resolve, 2000))
+  await new Promise(resolve => setTimeout(resolve, 3000))
 }
 if (!video) throw new Error("Video not ready")
 
