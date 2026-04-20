@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect, useRef } from "react"
@@ -103,7 +102,7 @@ export function MoodDetection() {
   const [moodHistory, setMoodHistory] = useState<Array<{ mood: string; time: string; confidence: number }>>([])
   const [showRecommendations, setShowRecommendations] = useState(false)
   const [statusText, setStatusText] = useState("")
-  const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || ""
+  const GEMINI_API_KEY = "AIzaSyDyW92uYY_rgvFd1inZUGKlr5UbDO1nePg"
 
   const { isCameraActive, requestCamera, stopCamera, cameraStream } = useCamera()
   const { showNotification } = useNotification()
