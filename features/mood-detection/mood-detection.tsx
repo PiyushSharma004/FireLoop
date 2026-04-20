@@ -102,7 +102,7 @@ export function MoodDetection() {
   const [moodHistory, setMoodHistory] = useState<Array<{ mood: string; time: string; confidence: number }>>([])
   const [showRecommendations, setShowRecommendations] = useState(false)
   const [statusText, setStatusText] = useState("")
-  const GEMINI_API_KEY = "AIzaSyDyW92uYY_rgvFd1inZUGKlr5UbDO1nePg"
+  const GEMINI_API_KEY = "AIzaSyCbF3bArGw1DrPEOUauWW3dsBySy5NM_RI"
 
   const { isCameraActive, requestCamera, stopCamera, cameraStream } = useCamera()
   const { showNotification } = useNotification()
@@ -140,7 +140,10 @@ export function MoodDetection() {
 
     try {
       const video = videoRef.current
-      if (!video) throw new Error("Video not ready")
+if (!video || !video.videoWidth) {
+  await new Promise(resolve => setTimeout(resolve, 2000))
+}
+if (!video) throw new Error("Video not ready")
 
       setStatusText("Capturing snapshot...")
 
