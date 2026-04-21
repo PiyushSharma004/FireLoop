@@ -1,3 +1,4 @@
+
 "use client"
 
 import type React from "react"
@@ -159,10 +160,12 @@ export function Sidebar({ activeFeature, setActiveFeature }: SidebarProps) {
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <Move className="h-4 w-4 text-slate-400" />
-            <div className="text-2xl animate-pulse">🔥</div>
+            <div className="text-2xl">🎬</div>
           </div>
           <div>
-            <h1 className="text-xl font-bold text-orange-400">FireLoop</h1>
+            <h1 className="text-xl font-bold">
+              <span className="text-red-500">MOOD</span><span className="text-white">FLIX</span>
+            </h1>
             <p className="text-xs text-slate-500">Emotion-Aware Streaming</p>
           </div>
         </div>
@@ -269,3 +272,4 @@ export function Sidebar({ activeFeature, setActiveFeature }: SidebarProps) {
     </div>
   )
 }
+
