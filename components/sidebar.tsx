@@ -141,10 +141,10 @@ export function Sidebar({ activeFeature, setActiveFeature }: SidebarProps) {
       style={sidebarStyle}
       className={`
         ${isDetached ? "" : "relative"} 
-        h-full w-80 bg-slate-800 border-r border-slate-700
+        h-full w-80 bg-zinc-900 border-r border-zinc-800
         flex flex-col flex-shrink-0
         ${isDragging ? "shadow-2xl" : ""}
-        ${isDetached ? "rounded-lg shadow-2xl border border-slate-600" : ""}
+        ${isDetached ? "rounded-lg shadow-2xl border border-zinc-700" : ""}
       `}
     >
       {/* Drag Handle */}
@@ -152,21 +152,21 @@ export function Sidebar({ activeFeature, setActiveFeature }: SidebarProps) {
         ref={dragRef}
         onMouseDown={handleDragStart}
         className={`
-          flex items-center justify-between p-4 border-b border-slate-700 flex-shrink-0
+          flex items-center justify-between p-4 border-b border-zinc-800 flex-shrink-0
           ${isDragging ? "cursor-grabbing" : "cursor-grab"}
-          hover:bg-slate-700/50 transition-colors
+          hover:bg-zinc-800/50 transition-colors
         `}
       >
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
-            <Move className="h-4 w-4 text-slate-400" />
+            <Move className="h-4 w-4 text-gray-400" />
             <div className="text-2xl">🎬</div>
           </div>
           <div>
             <h1 className="text-xl font-bold">
               <span className="text-red-500">MOOD</span><span className="text-white">FLIX</span>
             </h1>
-            <p className="text-xs text-slate-500">Emotion-Aware Streaming</p>
+            <p className="text-xs text-gray-500">Emotion-Aware Streaming</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -175,7 +175,7 @@ export function Sidebar({ activeFeature, setActiveFeature }: SidebarProps) {
               variant="ghost"
               size="sm"
               onClick={handleDock}
-              className="hover:bg-slate-700 text-slate-400 hover:text-white"
+              className="hover:bg-zinc-800 text-gray-400 hover:text-white"
               title="Dock sidebar"
             >
               <GripVertical className="h-4 w-4" />
@@ -185,7 +185,7 @@ export function Sidebar({ activeFeature, setActiveFeature }: SidebarProps) {
       </div>
 
       {/* User Profile Section */}
-      <div className="p-4 border-b border-slate-700">
+      <div className="p-4 border-b border-zinc-800">
         <div className="flex items-center gap-3">
           <img
             src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=50&h=50&fit=crop&crop=face"
@@ -194,7 +194,7 @@ export function Sidebar({ activeFeature, setActiveFeature }: SidebarProps) {
           />
           <div>
             <p className="font-medium text-white">Alex Johnson</p>
-            <p className="text-sm text-slate-400">Movie enthusiast</p>
+            <p className="text-sm text-gray-400">Movie enthusiast</p>
             <div className="flex items-center gap-1 mt-1">
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
               <span className="text-xs text-green-400">Online</span>
@@ -217,7 +217,7 @@ export function Sidebar({ activeFeature, setActiveFeature }: SidebarProps) {
                 ${
                   activeFeature === feature.id
                     ? "bg-red-600/20 text-red-500 border border-red-600/30 shadow-lg"
-                    : "hover:bg-slate-700 text-slate-300 hover:text-white hover:scale-[1.02]"
+                    : "hover:bg-zinc-800 text-gray-300 hover:text-white hover:scale-[1.02]"
                 }
               `}
             >
@@ -226,7 +226,7 @@ export function Sidebar({ activeFeature, setActiveFeature }: SidebarProps) {
               />
               <div className="flex-1 min-w-0">
                 <p className="font-medium truncate">{feature.name}</p>
-                <p className="text-xs text-slate-500 group-hover:text-slate-400 truncate">{feature.description}</p>
+                <p className="text-xs text-gray-500 group-hover:text-gray-400 truncate">{feature.description}</p>
               </div>
               {activeFeature === feature.id && (
                 <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
@@ -239,7 +239,7 @@ export function Sidebar({ activeFeature, setActiveFeature }: SidebarProps) {
       </nav>
 
       {/* Quick Actions - Bottom */}
-      <div className="p-4 border-t border-slate-700 flex-shrink-0">
+      <div className="p-4 border-t border-zinc-800 flex-shrink-0">
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={() => setActiveFeature("mood-detection")}
@@ -272,4 +272,7 @@ export function Sidebar({ activeFeature, setActiveFeature }: SidebarProps) {
     </div>
   )
 }
+
+
+
 

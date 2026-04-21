@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -12,27 +13,29 @@ export default function FireLoopApp() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    document.title = "🔥 FireLoop - Emotion-Aware Streaming"
+    document.title = "🎬 Moodflix - Emotion-Aware Streaming"
   }, [])
 
   useEffect(() => {
-    // Simulate app initialization
     const timer = setTimeout(() => {
       setIsLoading(false)
     }, 2000)
-
     return () => clearTimeout(timer)
   }, [])
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
-          <div className="text-6xl mb-4">🔥</div>
-          <h1 className="text-3xl font-bold text-orange-400 mb-2">FireLoop</h1>
-          <p className="text-slate-400">Loading your emotion-aware experience...</p>
-          <div className="mt-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-400 mx-auto"></div>
+          <h1 className="text-7xl font-black mb-4 tracking-tight">
+            <span className="text-red-600">MOOD</span>
+            <span className="text-white">FLIX</span>
+          </h1>
+          <p className="text-gray-500 text-lg mb-8">Emotion-Aware Streaming</p>
+          <div className="flex justify-center gap-2">
+            <div className="w-3 h-3 bg-red-600 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
+            <div className="w-3 h-3 bg-red-600 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
+            <div className="w-3 h-3 bg-red-600 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
           </div>
         </div>
       </div>
@@ -43,12 +46,9 @@ export default function FireLoopApp() {
     <ThemeProvider>
       <NotificationProvider>
         <CameraProvider>
-          <div className="min-h-screen bg-slate-900 text-white overflow-hidden">
+          <div className="min-h-screen bg-black text-white overflow-hidden">
             <div className="flex h-screen">
-              {/* Always visible sidebar */}
               <Sidebar activeFeature={activeFeature} setActiveFeature={setActiveFeature} />
-
-              {/* Main content area */}
               <MainContent activeFeature={activeFeature} setActiveFeature={setActiveFeature} />
             </div>
           </div>
@@ -57,3 +57,5 @@ export default function FireLoopApp() {
     </ThemeProvider>
   )
 }
+
+
