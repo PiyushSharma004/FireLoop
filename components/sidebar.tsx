@@ -4,7 +4,7 @@
 import type React from "react"
 
 import { useState, useRef, useEffect } from "react"
-import { Home, Brain, Users, Phone, Accessibility, Settings, Mic, Camera, Film, GripVertical, Move } from "lucide-react"
+import { Home, Brain, Users, Accessibility, Settings, Camera, Film, GripVertical, Move, Music, Trophy } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 interface SidebarProps {
@@ -35,12 +35,18 @@ const features = [
     description: "Watch with friends",
     color: "text-green-400",
   },
-  { id: "firecall", name: "FireCall", icon: Phone, description: "Video calls", color: "text-blue-400" },
   {
-    id: "voice-recall",
-    name: "FuzzyFind",
-    icon: Mic,
-    description: "Find movies by voice",
+    id: "mood-playlist",
+    name: "Mood Playlist",
+    icon: Music,
+    description: "Music for your mood",
+    color: "text-red-400",
+  },
+  {
+    id: "leaderboard",
+    name: "Leaderboard",
+    icon: Trophy,
+    description: "Compete with friends",
     color: "text-yellow-400",
   },
   {
@@ -160,12 +166,10 @@ export function Sidebar({ activeFeature, setActiveFeature }: SidebarProps) {
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <Move className="h-4 w-4 text-gray-400" />
-            <div className="text-2xl">🎬</div>
+            <div className="text-2xl ">🎬</div>
           </div>
           <div>
-            <h1 className="text-xl font-bold">
-              <span className="text-red-500">MOOD</span><span className="text-white">FLIX</span>
-            </h1>
+            <h1 className="text-xl font-bold text-red-500">MOODFLIX</h1>
             <p className="text-xs text-gray-500">Emotion-Aware Streaming</p>
           </div>
         </div>
@@ -217,7 +221,7 @@ export function Sidebar({ activeFeature, setActiveFeature }: SidebarProps) {
                 ${
                   activeFeature === feature.id
                     ? "bg-red-600/20 text-red-500 border border-red-600/30 shadow-lg"
-                    : "hover:bg-zinc-800 text-gray-300 hover:text-white hover:scale-[1.02]"
+                    : "hover:bg-zinc-800 text-slate-300 hover:text-white hover:scale-[1.02]"
                 }
               `}
             >
@@ -243,17 +247,17 @@ export function Sidebar({ activeFeature, setActiveFeature }: SidebarProps) {
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={() => setActiveFeature("mood-detection")}
-            className="flex items-center justify-center gap-2 p-2 bg-purple-500/20 text-purple-400 rounded-lg hover:bg-purple-500/30 transition-colors text-sm"
+            className="flex items-center justify-center gap-2 p-2 bg-red-600/20 text-red-400 rounded-lg hover:bg-red-600/30 transition-colors text-sm"
           >
             <Brain className="h-4 w-4" />
             <span className="hidden sm:inline">Mood Scan</span>
           </button>
           <button
-            onClick={() => setActiveFeature("firecall")}
-            className="flex items-center justify-center gap-2 p-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors text-sm"
+            onClick={() => setActiveFeature("leaderboard")}
+            className="flex items-center justify-center gap-2 p-2 bg-yellow-500/20 text-yellow-400 rounded-lg hover:bg-yellow-500/30 transition-colors text-sm"
           >
-            <Phone className="h-4 w-4" />
-            <span className="hidden sm:inline">FireCall</span>
+            <Trophy className="h-4 w-4" />
+            <span className="hidden sm:inline">Ranks</span>
           </button>
         </div>
       </div>
@@ -272,6 +276,9 @@ export function Sidebar({ activeFeature, setActiveFeature }: SidebarProps) {
     </div>
   )
 }
+
+
+
 
 
 

@@ -12,6 +12,8 @@ import { MovieReels } from "@/features/movie-reels/movie-reels"
 import { AccessibilityMode } from "@/features/accessibility/accessibility-mode"
 import { FatiguePrevention } from "@/features/fatigue-prevention/fatigue-prevention"
 import { Settings } from "@/features/settings/settings"
+import { MoodPlaylist } from "@/features/mood-playlist/mood-playlist"
+import { Leaderboard } from "@/features/leaderboard/leaderboard"
 import { useState, useEffect } from "react"
 
 interface MainContentProps {
@@ -48,6 +50,10 @@ export function MainContent({ activeFeature, setActiveFeature }: MainContentProp
         return <AccessibilityMode />
       case "fatigue-prevention":
         return <FatiguePrevention />
+      case "mood-playlist":
+        return <MoodPlaylist />
+      case "leaderboard":
+        return <Leaderboard />
       case "settings":
         return <Settings />
       default:
@@ -65,6 +71,8 @@ export function MainContent({ activeFeature, setActiveFeature }: MainContentProp
       "voice-recall": "🎤 FuzzyFind",
       accessibility: "♿ Accessibility Mode",
       "fatigue-prevention": "😴 Fatigue Prevention",
+      "mood-playlist": "🎵 Mood Playlist",
+      "leaderboard": "🏆 Leaderboard",
       settings: "⚙️ Settings",
     }
     return featureMap[activeFeature] || "🎬 Moodflix"
@@ -108,5 +116,6 @@ export function MainContent({ activeFeature, setActiveFeature }: MainContentProp
     </div>
   )
 }
+
 
 
