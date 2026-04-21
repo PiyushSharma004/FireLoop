@@ -1,3 +1,4 @@
+
 "use client"
 
 import { Wifi, Battery, Clock } from "lucide-react"
@@ -66,32 +67,32 @@ export function MainContent({ activeFeature, setActiveFeature }: MainContentProp
       "fatigue-prevention": "😴 Fatigue Prevention",
       settings: "⚙️ Settings",
     }
-    return featureMap[activeFeature] || "🔥 FireLoop"
+    return featureMap[activeFeature] || "🎬 Moodflix"
   }
 
   return (
     <div className="flex-1 flex flex-col">
       {/* Top Bar */}
-      <header className="flex items-center justify-between p-4 bg-slate-800 border-b border-slate-700 flex-shrink-0">
+      <header className="flex items-center justify-between p-4 bg-zinc-900 border-b border-zinc-800 flex-shrink-0">
         <div className="flex items-center gap-4">
           <div>
             <h2 className="font-semibold text-white text-lg">{getFeatureTitle()}</h2>
-            <p className="text-sm text-slate-400">Emotion-Aware Streaming • AI Powered</p>
+            <p className="text-sm text-gray-400">Emotion-Aware Streaming • AI Powered</p>
           </div>
         </div>
 
         <div className="flex items-center gap-4">
           {/* System Status */}
-          <div className="hidden lg:flex items-center gap-4 text-sm text-slate-400">
-            <div className="flex items-center gap-2 px-3 py-1 bg-slate-700 rounded-full">
+          <div className="hidden lg:flex items-center gap-4 text-sm text-gray-400">
+            <div className="flex items-center gap-2 px-3 py-1 bg-zinc-800 rounded-full">
               <Clock className="h-4 w-4" />
               <span>{currentTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
             </div>
-            <div className="flex items-center gap-2 px-3 py-1 bg-slate-700 rounded-full">
+            <div className="flex items-center gap-2 px-3 py-1 bg-zinc-800 rounded-full">
               <Wifi className="h-4 w-4 text-green-400" />
               <span className="text-green-400">Connected</span>
             </div>
-            <div className="flex items-center gap-2 px-3 py-1 bg-slate-700 rounded-full">
+            <div className="flex items-center gap-2 px-3 py-1 bg-zinc-800 rounded-full">
               <Battery className="h-4 w-4 text-blue-400" />
               <span className="text-blue-400">85%</span>
             </div>
@@ -103,7 +104,9 @@ export function MainContent({ activeFeature, setActiveFeature }: MainContentProp
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto bg-slate-900">{renderFeature()}</main>
+      <main className="flex-1 overflow-auto bg-black">{renderFeature()}</main>
     </div>
   )
 }
+
+

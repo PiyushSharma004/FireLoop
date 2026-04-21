@@ -167,15 +167,20 @@ export function MoodDetection() {
     }, 200)
 
     try {
-      // Wait for camera to be ready
+      // Wait for camera to be fully ready (videoWidth + readyState >= 2)
       let video = videoRef.current
       let attempts = 0
-      while ((!video || !video.videoWidth || video.videoWidth === 0) && attempts < 20) {
+      while (
+        (!video || !video.videoWidth || video.videoWidth === 0 || (video.readyState ?? 0) < 2) &&
+        attempts < 30
+      ) {
         await new Promise(resolve => setTimeout(resolve, 500))
         video = videoRef.current
         attempts++
       }
-      if (!video || !video.videoWidth) throw new Error("Video not ready")
+      if (!video || !video.videoWidth || (video.readyState ?? 0) < 2) {
+        throw new Error("Video stream not ready. Please allow camera and try again.")
+      }
 
       setStatusText("Detecting face...")
 
@@ -186,15 +191,29 @@ export function MoodDetection() {
         throw new Error("face-api.js not loaded yet, please try again")
       }
 
-      const detections = await faceapi
-        .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
-        .withFaceExpressions()
+      // Retry detection up to 5 times with tuned options (lower threshold catches more faces)
+      const detectorOptions = new faceapi.TinyFaceDetectorOptions({
+        inputSize: 416,       // larger input = better detection (224 | 320 | 416 | 512 | 608)
+        scoreThreshold: 0.3,  // lower = more sensitive (default 0.5 is too strict)
+      })
+
+      let detections = null
+      const MAX_RETRIES = 5
+      for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        setStatusText(`Detecting face... (attempt ${attempt}/${MAX_RETRIES})`)
+        detections = await faceapi
+          .detectSingleFace(video, detectorOptions)
+          .withFaceExpressions()
+        if (detections) break
+        // Short pause before retrying — gives video frame time to update
+        await new Promise(resolve => setTimeout(resolve, 400))
+      }
 
       clearInterval(progressInterval)
       setAnalysisProgress(100)
 
       if (!detections) {
-        throw new Error("No face detected. Please look at the camera.")
+        throw new Error("No face detected after multiple attempts. Make sure your face is clearly visible, well-lit, and centred in the camera.")
       }
 
       // Expressions object se best match nikalo
@@ -284,12 +303,12 @@ export function MoodDetection() {
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold mb-4 flex items-center justify-center gap-3">
-          <Brain className="h-10 w-10 text-purple-400" />
-          <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-            AI Mood Detection
+          <Brain className="h-10 w-10 text-red-500" />
+          <span className="bg-gradient-to-r from-red-600 to-red-400 bg-clip-text text-transparent">
+            Mood Detection
           </span>
         </h1>
-        <p className="text-slate-400 text-lg">
+        <p className="text-gray-400 text-lg">
           Advanced facial expression analysis for personalized content recommendations
         </p>
         <p className={`text-sm mt-2 ${faceApiLoaded ? "text-green-400" : "text-yellow-400"}`}>
@@ -299,7 +318,7 @@ export function MoodDetection() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Camera Feed */}
-        <Card className="bg-slate-800 border-slate-700">
+        <Card className="bg-zinc-900 border-zinc-800">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Camera className="h-5 w-5" />
@@ -307,7 +326,7 @@ export function MoodDetection() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="aspect-video bg-slate-900 rounded-lg flex items-center justify-center relative overflow-hidden">
+            <div className="aspect-video bg-black/50 rounded-lg flex items-center justify-center relative overflow-hidden">
               {isCameraActive ? (
                 <div className="relative w-full h-full">
                   <video
@@ -321,12 +340,12 @@ export function MoodDetection() {
                     <div className="absolute inset-0 bg-blue-500/20 flex flex-col items-center justify-center rounded-lg">
                       <RefreshCw className="h-12 w-12 animate-spin text-blue-400 mx-auto mb-3" />
                       <p className="text-blue-400 font-medium">{statusText || "Analyzing expressions..."}</p>
-                      <p className="text-sm text-slate-300 mt-1">Please look at the camera</p>
+                      <p className="text-sm text-gray-300 mt-1">Please look at the camera</p>
                       <div className="w-48 mt-4">
-                        <div className="w-full bg-slate-700 rounded-full h-2">
+                        <div className="w-full bg-zinc-800 rounded-full h-2">
                           <div className="h-2 rounded-full bg-blue-400 transition-all duration-300" style={{ width: `${analysisProgress}%` }} />
                         </div>
-                        <p className="text-xs text-center text-slate-300 mt-2">{analysisProgress}% complete</p>
+                        <p className="text-xs text-center text-gray-300 mt-2">{analysisProgress}% complete</p>
                       </div>
                     </div>
                   )}
@@ -334,15 +353,15 @@ export function MoodDetection() {
                     <div className="absolute inset-0 bg-green-500/20 flex flex-col items-center justify-center rounded-lg">
                       <CheckCircle className="h-12 w-12 text-green-400 mx-auto mb-3" />
                       <p className="text-green-400 font-medium">Face Scanned ✓</p>
-                      <p className="text-sm text-slate-300 mt-1">
+                      <p className="text-sm text-gray-300 mt-1">
                         Camera detected: {cameraMood} ({cameraConfidence}%)
                       </p>
                     </div>
                   )}
                   {step === "done" && (
                     <div className="absolute inset-0 bg-purple-500/20 flex flex-col items-center justify-center rounded-lg">
-                      <CheckCircle className="h-12 w-12 text-purple-400 mx-auto mb-3" />
-                      <p className="text-purple-400 font-medium">Mood Confirmed ✓</p>
+                      <CheckCircle className="h-12 w-12 text-red-500 mx-auto mb-3" />
+                      <p className="text-red-500 font-medium">Mood Confirmed ✓</p>
                     </div>
                   )}
                   {isCameraActive && step === "idle" && (
@@ -354,8 +373,8 @@ export function MoodDetection() {
               ) : (
                 <div className="text-center">
                   <Camera className="h-16 w-16 text-slate-600 mx-auto mb-4" />
-                  <p className="text-slate-400">Camera not active</p>
-                  <p className="text-sm text-slate-500 mt-1">Click "Start Analysis" to begin</p>
+                  <p className="text-gray-400">Camera not active</p>
+                  <p className="text-sm text-gray-500 mt-1">Click "Start Analysis" to begin</p>
                 </div>
               )}
             </div>
@@ -363,7 +382,7 @@ export function MoodDetection() {
         </Card>
 
         {/* Right Panel */}
-        <Card className="bg-slate-800 border-slate-700">
+        <Card className="bg-zinc-900 border-zinc-800">
           {step === "question" ? (
             <>
               <CardHeader>
@@ -374,11 +393,11 @@ export function MoodDetection() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-slate-300 mb-1 text-sm">
+                <p className="text-gray-300 mb-1 text-sm">
                   Camera says you look <span className="text-yellow-400 font-semibold">{cameraMood}</span>.
                   But you know yourself best — aap actually kaisa feel kar rahe ho?
                 </p>
-                <p className="text-slate-400 text-xs mb-4">Your answer will fine-tune the recommendations 🎯</p>
+                <p className="text-gray-400 text-xs mb-4">Your answer will fine-tune the recommendations 🎯</p>
                 <div className="grid grid-cols-2 gap-2">
                   {quickMoodOptions.map((option) => (
                     <button
@@ -387,7 +406,7 @@ export function MoodDetection() {
                       className={`p-3 rounded-lg text-sm font-medium transition-all border-2 text-left
                         ${option.value === cameraMood
                           ? "border-yellow-500 bg-yellow-500/10 text-yellow-300"
-                          : "border-slate-600 bg-slate-700 text-slate-200 hover:border-purple-500 hover:bg-purple-500/10"
+                          : "border-zinc-700 bg-zinc-800 text-gray-200 hover:border-purple-500 hover:bg-purple-500/10"
                         }`}
                     >
                       {option.label}
@@ -413,24 +432,24 @@ export function MoodDetection() {
                     <div className="text-8xl animate-bounce">{currentMood.emoji}</div>
                     <div>
                       <h3 className="text-3xl font-bold text-white mb-2">{detectedMood}</h3>
-                      <p className="text-slate-400 mb-2">{currentMood.description}</p>
+                      <p className="text-gray-400 mb-2">{currentMood.description}</p>
                       <div className="flex items-center justify-center gap-2">
                         <Zap className="h-4 w-4 text-yellow-400" />
                         <span className="text-yellow-400 font-medium">Confidence: {confidence}%</span>
                       </div>
                     </div>
-                    <div className="w-full bg-slate-700 rounded-full h-3">
+                    <div className="w-full bg-zinc-800 rounded-full h-3">
                       <div className={`h-3 rounded-full ${currentMood.color} transition-all duration-1000`} style={{ width: `${confidence}%` }} />
                     </div>
                     <div className="grid grid-cols-2 gap-4 mt-6">
-                      <div className="text-center p-3 bg-slate-700 rounded-lg">
+                      <div className="text-center p-3 bg-zinc-800 rounded-lg">
                         <Heart className="h-6 w-6 text-red-400 mx-auto mb-1" />
-                        <p className="text-sm text-slate-400">Emotional State</p>
+                        <p className="text-sm text-gray-400">Emotional State</p>
                         <p className="font-medium text-white">{detectedMood}</p>
                       </div>
-                      <div className="text-center p-3 bg-slate-700 rounded-lg">
+                      <div className="text-center p-3 bg-zinc-800 rounded-lg">
                         <TrendingUp className="h-6 w-6 text-green-400 mx-auto mb-1" />
-                        <p className="text-sm text-slate-400">Recommendations</p>
+                        <p className="text-sm text-gray-400">Recommendations</p>
                         <p className="font-medium text-white">{recommendations.length} found</p>
                       </div>
                     </div>
@@ -438,7 +457,7 @@ export function MoodDetection() {
                 ) : (
                   <div className="text-center py-12">
                     <Activity className="h-16 w-16 text-slate-600 mx-auto mb-4" />
-                    <p className="text-slate-400 text-lg">
+                    <p className="text-gray-400 text-lg">
                       {isAnalyzing ? "Analyzing your mood..." : "Start analysis to detect your mood"}
                     </p>
                     {isAnalyzing && (
@@ -449,17 +468,17 @@ export function MoodDetection() {
                       </div>
                     )}
                     {!isAnalyzing && step === "idle" && (
-                      <div className="mt-6 flex flex-col items-center gap-2 text-slate-500 text-sm">
+                      <div className="mt-6 flex flex-col items-center gap-2 text-gray-500 text-sm">
                         <div className="flex items-center gap-2">
-                          <span className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-xs">1</span>
+                          <span className="w-6 h-6 rounded-full bg-zinc-800 flex items-center justify-center text-xs">1</span>
                           <span>Camera scans your face</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-xs">2</span>
+                          <span className="w-6 h-6 rounded-full bg-zinc-800 flex items-center justify-center text-xs">2</span>
                           <span>Quick mood confirmation</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-xs">3</span>
+                          <span className="w-6 h-6 rounded-full bg-zinc-800 flex items-center justify-center text-xs">3</span>
                           <span>Personalized recommendations!</span>
                         </div>
                       </div>
@@ -508,24 +527,24 @@ export function MoodDetection() {
 
       {/* Mood History */}
       {moodHistory.length > 0 && (
-        <Card className="bg-slate-800 border-slate-700">
+        <Card className="bg-zinc-900 border-zinc-800">
           <CardHeader><CardTitle>Recent Mood History</CardTitle></CardHeader>
           <CardContent>
             <div className="space-y-3">
               {moodHistory.map((entry, index) => {
                 const mood = moods.find((m) => m.name === entry.mood)
                 return (
-                  <div key={index} className="flex items-center justify-between p-3 bg-slate-700 rounded-lg">
+                  <div key={index} className="flex items-center justify-between p-3 bg-zinc-800 rounded-lg">
                     <div className="flex items-center gap-3">
                       <span className="text-2xl">{mood?.emoji}</span>
                       <div>
                         <p className="font-medium text-white">{entry.mood}</p>
-                        <p className="text-sm text-slate-400">{entry.time}</p>
+                        <p className="text-sm text-gray-400">{entry.time}</p>
                       </div>
                     </div>
                     <div className="text-right">
                       <p className="text-sm text-green-400">{entry.confidence}%</p>
-                      <p className="text-xs text-slate-500">confidence</p>
+                      <p className="text-xs text-gray-500">confidence</p>
                     </div>
                   </div>
                 )
@@ -537,7 +556,7 @@ export function MoodDetection() {
 
       {/* Recommendations */}
       {showRecommendations && detectedMood && recommendations.length > 0 && (
-        <Card className="bg-slate-800 border-slate-700">
+        <Card className="bg-zinc-900 border-zinc-800">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Heart className="h-5 w-5 text-red-400" />
@@ -548,7 +567,7 @@ export function MoodDetection() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {recommendations.map((content) => (
-                <div key={content.id} className="bg-slate-700 rounded-lg overflow-hidden hover:scale-105 transition-transform cursor-pointer group">
+                <div key={content.id} className="bg-zinc-800 rounded-lg overflow-hidden hover:scale-105 transition-transform cursor-pointer group">
                   <div className="relative aspect-[3/4]">
                     <img src={content.image || "/placeholder.svg"} alt={content.title} className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -564,8 +583,8 @@ export function MoodDetection() {
                   </div>
                   <div className="p-3">
                     <h3 className="font-medium text-white mb-1">{content.title}</h3>
-                    <p className="text-sm text-slate-400 mb-2">{content.genre} • {content.year}</p>
-                    <p className="text-xs text-slate-500 line-clamp-2">{content.description}</p>
+                    <p className="text-sm text-gray-400 mb-2">{content.genre} • {content.year}</p>
+                    <p className="text-xs text-gray-500 line-clamp-2">{content.description}</p>
                   </div>
                 </div>
               ))}
@@ -576,14 +595,6 @@ export function MoodDetection() {
     </div>
   )
 }
-
-
-
-
-
-
-
-
 
 
 
