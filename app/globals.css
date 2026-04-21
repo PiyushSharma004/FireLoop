@@ -1,28 +1,30 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 15 23 42;
-    --foreground: 248 250 252;
-    --card: 30 41 59;
-    --card-foreground: 248 250 252;
-    --popover: 30 41 59;
-    --popover-foreground: 248 250 252;
-    --primary: 234 88 12;
+    /* Netflix Red/Black Theme */
+    --background: 10 10 10;
+    --foreground: 255 255 255;
+    --card: 20 20 20;
+    --card-foreground: 255 255 255;
+    --popover: 20 20 20;
+    --popover-foreground: 255 255 255;
+    --primary: 229 9 20;
     --primary-foreground: 255 255 255;
-    --secondary: 51 65 85;
-    --secondary-foreground: 248 250 252;
-    --muted: 51 65 85;
-    --muted-foreground: 148 163 184;
-    --accent: 51 65 85;
-    --accent-foreground: 248 250 252;
-    --destructive: 239 68 68;
-    --destructive-foreground: 248 250 252;
-    --border: 51 65 85;
-    --input: 51 65 85;
-    --ring: 234 88 12;
+    --secondary: 30 30 30;
+    --secondary-foreground: 255 255 255;
+    --muted: 30 30 30;
+    --muted-foreground: 180 180 180;
+    --accent: 229 9 20;
+    --accent-foreground: 255 255 255;
+    --destructive: 229 9 20;
+    --destructive-foreground: 255 255 255;
+    --border: 40 40 40;
+    --input: 30 30 30;
+    --ring: 229 9 20;
     --radius: 0.5rem;
   }
 
@@ -150,3 +152,5 @@ html {
 .gradient-overlay-top {
   background: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), transparent);
 }
+
+

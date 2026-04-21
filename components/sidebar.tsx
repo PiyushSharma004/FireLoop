@@ -216,13 +216,13 @@ export function Sidebar({ activeFeature, setActiveFeature }: SidebarProps) {
                 transition-all duration-200 group relative overflow-hidden
                 ${
                   activeFeature === feature.id
-                    ? "bg-orange-500/20 text-orange-400 border border-orange-500/30 shadow-lg"
+                    ? "bg-red-600/20 text-red-500 border border-red-600/30 shadow-lg"
                     : "hover:bg-slate-700 text-slate-300 hover:text-white hover:scale-[1.02]"
                 }
               `}
             >
               <Icon
-                className={`h-5 w-5 flex-shrink-0 ${activeFeature === feature.id ? "text-orange-400" : feature.color}`}
+                className={`h-5 w-5 flex-shrink-0 ${activeFeature === feature.id ? "text-red-500" : feature.color}`}
               />
               <div className="flex-1 min-w-0">
                 <p className="font-medium truncate">{feature.name}</p>
@@ -230,7 +230,7 @@ export function Sidebar({ activeFeature, setActiveFeature }: SidebarProps) {
               </div>
               {activeFeature === feature.id && (
                 <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
-                  <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
                 </div>
               )}
             </button>
