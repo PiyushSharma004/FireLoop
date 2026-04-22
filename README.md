@@ -1,6 +1,6 @@
-# 🔥 FireLoop - Emotion-Aware Smart Streaming Interface
+# 🔥 MoodFlix - Emotion-Aware Smart Streaming Interface
 
-Fireloop is an AI-powered multimedia streaming prototype that personalizes the viewing experience using mood detection and behavioral analysis. Designed for the next generation of immersive and intelligent content delivery.
+MoodFlix is an AI-powered multimedia streaming prototype that personalizes the viewing experience using mood detection and behavioral analysis. Designed for the next generation of immersive and intelligent content delivery.
 
 ## ✨ Features
 
